@@ -18,7 +18,7 @@ html(lang="en")
 
                 $('#send-message').unbind('click').on('click', function(){
                     showLoading();
-                    const formData = new FormData();
+                    //const formData = new FormData();
 
                     //- if($('#shareholder-list')[0].files[0] && !$('#shareholder-list')[0].files[0]?.name.endsWith('.xlsx')){
                     //-     alert('Mẫu thư phải là file .xlsx')
@@ -27,41 +27,56 @@ html(lang="en")
                     //- }
 
                     //- formData.append("shareholder-list", $('#shareholder-list')[0].files[0]);
-                    formData.append("phone", $('#phone-number').val());
-                    formData.append("message", $('#message').val());
+                    //- formData.append("phone", $('#phone-number').val());
+                    //- formData.append("message", $('#message').val());
 
-                    $.ajax({
-                        type:'post',
-                        url: '/send',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(data){
-                            closeLoading();
-                            if(data.code == 200){
-                                $('form input').val('');
-                                $('form textarea').val('');
-                            }
-                            else{
-                                alert(data.message)
-                            }
-                        },
-                        error: function(err){
-                            if(err.status == 500){
-                                alert(err.statusText)
-                            }
-                            else{
-                                console.log(err.error);
-                            }
-                            closeLoading();
+                    $.post('/send', 
+                    { 
+                        phone: $('#phone-number').val(), 
+                        message: $('#message').val() 
+                    }, function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                            $('form input').val('');
+                            $('form textarea').val('');
+                        }
+                        else{
+                            alert(data.message)
                         }
                     })
+
+                    //- $.ajax({
+                    //-     type:'post',
+                    //-     url: '/send',
+                    //-     data: formData,
+                    //-     processData: false,
+                    //-     contentType: false,
+                    //-     success: function(data){
+                    //-         closeLoading();
+                    //-         if(data.code == 200){
+                    //-             $('form input').val('');
+                    //-             $('form textarea').val('');
+                    //-         }
+                    //-         else{
+                    //-             alert(data.message)
+                    //-         }
+                    //-     },
+                    //-     error: function(err){
+                    //-         if(err.status == 500){
+                    //-             alert(err.statusText)
+                    //-         }
+                    //-         else{
+                    //-             console.log(err.error);
+                    //-         }
+                    //-         closeLoading();
+                    //-     }
+                    //- })
                 })
 
                 $('#add-frd').unbind('click').on('click', function(){
                     showLoading();
-                    const formData = new FormData();
-                    formData.append("phone", $('#phone-number').val());
+                    //- const formData = new FormData();
+                    //- formData.append("phone", $('#phone-number').val());
 
                     $.post('/add-friend', { phone: $('#phone-number').val() }, function(data){
                         closeLoading();
