@@ -114,6 +114,18 @@ html(lang="en")
                     //-     }
                     //- })
                 })
+
+                $('#login').unbind('click').on('click', function(){
+                    showLoading();
+                    $.get('/login', function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+                })
             })
 
     body(style="margin: 0; height:100vh;")
@@ -135,6 +147,7 @@ html(lang="en")
 
             div(style="margin-top: 20px; margin-left: 0%; display:flex")
                 button(type="button", id='add-frd', style="min-width: 90px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
-                button(type="button", id='send-message', style="min-width: 90px; min-height: 40px; background-color: #16a529; color: white; border: 0;") Gửi tin nhắn
+                button(type="button", id='send-message', style="min-width: 90px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
+                button(type="button", id='login', style="min-width: 90px; min-height: 40px; background-color: #16a529; color: white; border: 0;") Đăng nhập
 
 
