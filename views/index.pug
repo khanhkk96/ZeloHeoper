@@ -7,7 +7,7 @@ html(lang="en")
         title Kaka
         script(src="https://code.jquery.com/jquery-3.6.3.min.js") 
         script.
-            $(document).ready(function(){
+            $(document).ready(async function(){
                 function showLoading(){
                     $('#loading-view').show();
                 }
@@ -37,8 +37,9 @@ html(lang="en")
                     }, function(data){
                         closeLoading();
                         if(data.code == 200){
-                            $('form input').val('');
+                            //$('form input').val('');
                             $('form textarea').val('');
+                            alert(data.message)
                         }
                         else{
                             alert(data.message)
@@ -82,6 +83,7 @@ html(lang="en")
                         closeLoading();
                         if(data.code == 200){
                             $('form input').val('');
+                            alert(data.message)
                         }
                         else{
                             alert(data.message)
@@ -120,6 +122,22 @@ html(lang="en")
                     $.get('/login', function(data){
                         closeLoading();
                         if(data.code == 200){
+                            alert(data.message)
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+                })
+
+                $('#add-cookies').unbind('click').on('click', function(){
+                    showLoading();
+
+                    $.post('/add-cookies', { cookies: $('#cookies').val() }, function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                            $('#cookies').val('');
+                            alert(data.message)
                         }
                         else{
                             alert(data.message)
@@ -145,9 +163,15 @@ html(lang="en")
                     p(style="margin-bottom: 5px;") Tin nhắn
                     textarea(name="message", id="message", style="width: 100%", rows="4")
 
+                div
+                    p(style="margin-bottom: 5px;") Cookies
+                    textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+
             div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                button(type="button", id='add-frd', style="min-width: 90px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
-                button(type="button", id='send-message', style="min-width: 90px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
-                button(type="button", id='login', style="min-width: 90px; min-height: 40px; background-color: #16a529; color: white; border: 0;") Đăng nhập
+                button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
+                button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
+            div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
+                button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
 
 

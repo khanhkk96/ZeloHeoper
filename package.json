@@ -1,7 +1,5 @@
 {
     "dependencies": {
-        "@antiadmin/anticaptchaofficial": "^1.0.37",
-        "2captcha": "^3.0.6",
         "express": "^4.18.2",
         "multer": "^1.4.5-lts.1",
         "pug": "^3.0.2",

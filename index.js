@@ -3,10 +3,8 @@ const multer = require('multer');
 const express = require('express');
 const slugify = require('slugify');
 const path = require('path');
-var morgan = require('morgan');
-const ac = require('@antiadmin/anticaptchaofficial');
-const Captcha = require('2captcha');
-const solver = new Captcha.Solver('9d3c3d08d79604e9af50b0d70daaf44a');
+const morgan = require('morgan');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -74,82 +72,117 @@ console.log('Server is running....');
 
 const PHONE_REGEX = /([84|0]+(3|5|7|8|9){1})+([0-9]{8})\b/g;
 
-app.get('/login', async (req, res) => {
+const getCookies = (cookieString) => {
+    let cookies = [];
+    if (cookieString) {
+        cookieString = cookieString.split('|')[0];
+        cookies = JSON.parse(cookieString);
+    }
+    return cookies;
+};
+
+const loginAccount = async (page) => {
+    const cookiesData = fs.readFileSync('cookies.json');
+    const cookies = getCookies(cookiesData.toString());
+
+    await page.goto(
+        'https://id.zalo.me/account?continue=https://chat.zalo.me/',
+        {
+            waitUntil: 'domcontentloaded',
+            referer: 'https://chat.zalo.me/',
+            referrerPolicy: 'strict-origin-when-cross-origin',
+        },
+    );
+
+    await page.setCookie(...cookies);
+    await page.reload();
+
+    //choose manual login option
+    const chooseManual = await page.waitForSelector(
+        'div.tabs ul li:nth-child(2) a',
+    );
+    if (!chooseManual) {
+        return res.json({
+            message: 'Error',
+            code: 400,
+        });
+    }
+    await chooseManual.click();
+
+    //input phone
+    //await page.type('#input-phone', '0354908152', { delay: 200 });
+
+    //input password
+    await page.type(
+        '.form-signin .line-form input[type="password"]',
+        'Kaymouse.28',
+        //{ delay: 200 },
+    );
+
+    //login into account
+    const loginBtn = await page.waitForSelector(
+        '.form-signin .has-2btn a.first',
+    );
+    if (!loginBtn) {
+        return res.json({
+            message: 'Error',
+            code: 400,
+        });
+    }
+    await loginBtn.click();
+};
+
+app.post('/add-cookies', async function (req, res) {
+    const { cookies } = req.body;
+    if (cookies) {
+        const checkLineChar = cookies.indexOf('|');
+        let cookiesData = cookies;
+        if (checkLineChar >= 0) {
+            cookiesData = cookies.split('|')[0];
+        }
+        try {
+            const cookieList = JSON.parse(cookiesData);
+            console.log(cookieList);
+            if (!Array.isArray(cookieList)) {
+                throw new Error('Cookies không hợp lệ');
+            }
+        } catch (ex) {
+            return res.json({
+                message: 'Cookies không hợp lệ.',
+                code: 400,
+            });
+        }
+        fs.writeFileSync('cookies.json', cookiesData);
+        return res.json({
+            message: 'Lưu cookie thành công',
+            code: 200,
+        });
+    }
+    return res.json({
+        message: 'Cookies không hợp lệ.',
+        code: 400,
+    });
+});
+
+app.get('/login', async function (req, res) {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: false,
+            //headless: false,
             defaultViewport: false,
             executablePath:
                 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         });
+
         const page = (await browser.pages())[0];
-        await page.goto(
-            'https://id.zalo.me/account?continue=https://chat.zalo.me',
-            { waitUntil: 'domcontentloaded' },
-        );
 
-        // //waiting page load done
-        // await new Promise((resolve, reject) => {
-        //     setTimeout(resolve, 1000);
-        // });
-
-        //choose manual login option
-        const chooseManual = await page.waitForSelector(
-            'div.tabs ul li:nth-child(2) a',
-        );
-        if (!chooseManual) {
-            return res.json({
-                message: 'Error',
-                code: 400,
-            });
-        }
-        await chooseManual.click();
-
-        //input phone
-        await page.type('#input-phone', '0354908152', { delay: 200 });
-
-        //input password
-        await page.type(
-            '.form-signin .line-form input[type="password"]',
-            'Kaymouse.28',
-            { delay: 200 },
-        );
-
-        //login into account
-        const loginBtn = await page.waitForSelector(
-            '.form-signin .has-2btn a.first',
-        );
-        if (!loginBtn) {
-            return res.json({
-                message: 'Error',
-                code: 400,
-            });
-        }
-        await loginBtn.click();
-
-        // const result = await solver.recaptcha(
-        //     '6Ld2sf4SAAAAAKSgzs0Q13IZhY02Pyo31S2jgOB5',
-        //     'https://id.zalo.me/account?continue=https://chat.zalo.me',
-        // );
-
-        // console.log(result);
-
-        // ac.setAPIKey('98c2ef77115807e3977e7a92a8798f9b');
-        // const balance = await ac.getBalance();
-        // console.log(`my balance is $${balance}`);
-        // if (balance <= 0) {
-        //     throw 'negative balance';
-        // }
-        // console.log('solving a captcha..');
+        await loginAccount(page);
     } catch (ex) {
         console.log('Error: ', ex);
         return res.json({
             message: 'Error',
             code: 400,
         });
-    } finally {
-        // await browser.close();
     }
 
     return res.json({
@@ -178,7 +211,8 @@ app.post('/send', async (req, res) => {
         });
     }
 
-    phone = phone.replace(/\s/g, '');
+    phone = phone.replace(/\s/g, '').replace(/^\+/, '');
+
     // if (!PHONE_REGEX.test(phone)) {
     //     return res.json({
     //         message: 'Số điện thoại không hợp lệ',
@@ -189,21 +223,19 @@ app.post('/send', async (req, res) => {
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: false,
-            defaultViewport: false,
-            executablePath:
-                'C:/Program Files/Google/Chrome/Application/chrome.exe',
+            //headless: false,
+            //defaultViewport: false,
+            // executablePath:
+            //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
         });
+
         const page = (await browser.pages())[0];
-        await page.goto(
-            'https://id.zalo.me/account?continue=https://chat.zalo.me',
-            { waitUntil: 'domcontentloaded' },
-        );
+        await loginAccount(page);
 
         //waiting page load done
-        await new Promise((resolve, reject) => {
-            setTimeout(resolve, 3000);
-        });
+        // await new Promise((resolve, reject) => {
+        //     setTimeout(resolve, 3000);
+        // });
 
         await page.waitForNavigation();
         console.log('logged in...');
@@ -221,11 +253,15 @@ app.post('/send', async (req, res) => {
         await enableInputPhone.click();
 
         //input phone to search
-        await page.type('#contact-search-input', phone, { delay: 300 });
+        await page.type(
+            '#contact-search-input',
+            phone,
+            //{ delay: 300 }
+        );
 
         //choose a friend to send message
         const chooseFriend = await page.waitForSelector(
-            '#global_search_list .ReactVirtualized__Grid__innerScrollContainer div:nth-child(2)',
+            '#searchResultList #searchResultList .ReactVirtualized__Grid__innerScrollContainer div:nth-child(2) .conv-item__avatar',
             { visible: true },
         );
         if (!chooseFriend) {
@@ -236,8 +272,17 @@ app.post('/send', async (req, res) => {
         }
         await chooseFriend.click();
 
+        //waiting page load done
+        await new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000);
+        });
+
         //input message
-        await page.type('#richInput', message, { delay: 200 });
+        await page.type(
+            '#richInput',
+            message,
+            //{ delay: 200 }
+        );
 
         //send message
         const sendMessageBtn = await page.waitForSelector(
@@ -257,7 +302,7 @@ app.post('/send', async (req, res) => {
             code: 400,
         });
     } finally {
-        await browser.close();
+        //await browser.close();
     }
 
     console.log('end time: ', new Date());
@@ -281,34 +326,30 @@ app.post('/add-friend', async (req, res) => {
         });
     }
 
-    phone = phone.replace(/\s/g, '');
-    if (!PHONE_REGEX.test(phone)) {
-        return res.json({
-            message: 'Số điện thoại không hợp lệ',
-            code: 400,
-        });
-    }
+    phone = phone.replace(/\s/g, '').replace(/^\+/, '');
+    // if (!PHONE_REGEX.test(phone)) {
+    //     return res.json({
+    //         message: 'Số điện thoại không hợp lệ',
+    //         code: 400,
+    //     });
+    // }
 
     let browser;
     try {
         browser = await puppeteer.launch({
-            headless: false,
-            defaultViewport: false,
-            executablePath:
-                'C:/Program Files/Google/Chrome/Application/chrome.exe',
+            // headless: false,
+            // defaultViewport: false,
+            // executablePath:
+            //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
         });
-        const page = (await browser.pages())[0];
-        //const page = await browser.newPage();
 
-        await page.goto(
-            'https://id.zalo.me/account?continue=https://chat.zalo.me',
-            { waitUntil: 'domcontentloaded' },
-        );
+        const page = (await browser.pages())[0];
+        await loginAccount(page);
 
         //waiting page load done
-        await new Promise((resolve, reject) => {
-            setTimeout(resolve, 3000);
-        });
+        // await new Promise((resolve, reject) => {
+        //     setTimeout(resolve, 3000);
+        // });
 
         console.log('start waiting: ', new Date());
         await page.waitForNavigation();
@@ -332,7 +373,11 @@ app.post('/add-friend', async (req, res) => {
         await openAddFrModal.click();
 
         //input phone number
-        await page.type('.phone-i-input', phone, { delay: 300 });
+        await page.type(
+            '.phone-i-input',
+            phone,
+            //{ delay: 300 }
+        );
 
         //click seach button
         const searchFrBtn = await page.waitForSelector(
@@ -349,7 +394,7 @@ app.post('/add-friend', async (req, res) => {
         //confirm specified friend
         const confirmFrBtn = await page.waitForSelector(
             'div[data-id="btn_UserProfile_AddFrd"]',
-            { timeout: 3000 },
+            { timeout: 2000 },
         );
         if (!confirmFrBtn) {
             return res.json({
@@ -378,7 +423,7 @@ app.post('/add-friend', async (req, res) => {
         });
     } finally {
         //close browser
-        await browser.close();
+        //await browser.close();
     }
 
     return res.json({
