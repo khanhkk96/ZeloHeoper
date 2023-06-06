@@ -144,34 +144,379 @@ html(lang="en")
                         }
                     })
                 })
+
+                $('.modal .cancel').unbind('click').on('click', function(){
+                    $(this).parents('div.modal').hide();
+                });
+
+                $('.modal .close').unbind('click').on('click', function(){
+                    $(this).parents('div.modal').hide();
+                });
             })
+
+            function openCity(evt, cityName) {
+                var i, tabcontent, tablinks;
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(cityName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+
+        style.
+            #loading-view{
+                display: none; 
+                height: 100%; 
+                width: 100%; 
+                position: fixed; 
+                z-index: 999; 
+                background-color: rgb(79 178 98 / 76%);
+            }
+
+            #loading-view h1{
+                position:absolute;
+                 top: 30%; 
+                 left: 45%; 
+                 font-size: 45px; 
+                 color: #073a07;
+            }
+
+            .container{
+                margin: 0 auto; 
+                padding-top: 8%; 
+                max-width: 800px
+            }
+
+            /* Style the tab */
+            .tab {
+                overflow: hidden;
+                border: 1px solid #ccc;
+                background-color: #f1f1f1;
+            }
+
+            /* Style the buttons inside the tab */
+            .tab button {
+                background-color: inherit;
+                float: left;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                transition: 0.3s;
+                font-size: 17px;
+            }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #ccc;
+            }
+
+            /* Style the tab content */
+            .tabcontent {
+                display: none;
+                padding: 6px 12px;
+                border: 1px solid #ccc;
+                border-top: none;
+            }
+
+            .btn.add-friend{
+                min-width: 100px; 
+                min-height: 40px; 
+                margin-right: 20px; 
+                background-color: #55a6f7; 
+                color: white; 
+                border: 0;
+            }
+
+            .btn.send-ms{
+                min-width: 100px; 
+                min-height: 40px; 
+                background-color: #16a529; 
+                color: white; 
+                border: 0; 
+                margin-right: 20px;
+            }
+
+            .btn.submit{
+                min-width: 100px; 
+                min-height: 40px; 
+                background-color: #0061c2; 
+                color: white; 
+                border: 0; 
+                margin-right: 20px;
+            }
+
+            .btn.cancel{
+                min-width: 100px; 
+                min-height: 40px; 
+                background-color: red; 
+                color: white; 
+                border: 0; 
+                margin-right: 20px;
+            }
+
+            .form-item input{
+                height: 28px;
+            }
+
+            .form-item input, .form-item textarea{
+                width: 100%;
+                font-size: 11pt;
+            }
+
+            .hide{
+                display: none;
+            }
+
+            .show{
+                display: block;
+            }
+
+            table {
+                font-family: Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            table td, table th {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            table tr:nth-child(even){background-color: #f2f2f2;}
+
+            table tr:hover {background-color: #ddd;}
+
+            table th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left;
+                background-color: #004f8b;
+                color: white;
+            }
+
+            .container .tabcontent .button-groups{
+                margin: 10px 0;
+            }
+
+            .container .tabcontent .button-groups .table-btn{
+                min-width: 70px;
+                height: 30px;
+                margin-right: 10px;
+            }
+
+            .container .tabcontent .button-groups .table-btn.add{
+                background-color: #1bba1b;
+                color: white;
+                border: 0
+            }
+
+            .container .tabcontent .button-groups .table-btn.delete{
+                background-color: #b30808;
+                color: white;
+                border: 0
+            }
+
+            .container .tabcontent .row-btn{
+                margin-right: 5px;
+                padding: 5px 10px;
+            }
+
+            .container .tabcontent .row-btn.delete{
+                background-color: #b30808;
+                color: white;
+                border: 0
+            }
+
+            .container .tabcontent .row-btn.edit{
+                background-color: #09297e;
+                color: white;
+                border: 0
+            }
+
+            .modal {
+                display: none; /* Hidden by default */
+                position: fixed; /* Stay in place */
+                z-index: 1; /* Sit on top */
+                padding-top: 100px; /* Location of the box */
+                left: 0;
+                top: 0;
+                width: 100%; /* Full width */
+                height: 100%; /* Full height */
+                overflow: auto; /* Enable scroll if needed */
+                background-color: rgb(0,0,0); /* Fallback color */
+                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            }
+
+            /* Modal Content */
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 500px;
+            }
+
+            /* The Close Button */
+            .close {
+                color: #aaaaaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+            }
+
+            .close:hover,
+            .close:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
 
     body(style="margin: 0; height:100vh;")
 
-    div(style="display: none; height: 100%; width: 100%; position: fixed; z-index: 999; background-color: rgb(79 178 98 / 76%)", id="loading-view")
-        h1(style="position:absolute; top: 35%; left: 45%; font-size: 45px; color: #073a07") Đang xử lý....
-    div(style="margin: 0 auto; padding-top: 12%; max-width: 500px")
-        h1(style="margin: 0") Kết bạn 4fun
-    
-        div(style="width: 100%; float: left;")
-            form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+        div(id="loading-view")
+            h1 Đang xử lý....
+            
+        div(class="container")
+            h1(style="margin: 0") 4Fun
+        
+            div(class="tab")
+                button(class="tablinks active", onclick="openCity(event, 'Accounts')") Tài khoản
+                button(class="tablinks", onclick="openCity(event, 'Friends')") Kết bạn
+                button(class="tablinks", onclick="openCity(event, 'MessageBox')") Nhắn tin
+            
+            div(id="Accounts", class="tabcontent", style="display:block;")
+                h3(style="margin-bottom: 0;") Quản lý tài khoản
+                div(class="button-groups")
+                    button(class="table-btn add", id="add-item", onclick="$('#add-account').show()") Thêm mới
+                    //- button(class="table-btn delete", id="delete-item") Xóa
+                
                 div
-                    p(style="margin-bottom: 5px;") Số điện thoại 
-                    input(type="text", name="phone", id="phone-number", style="width: 100%")
+                    table
+                        tr
+                            th STT
+                            th Tài khoản 
+                            th Thao tác
+                        tr
+                            td 1
+                            td khanhkk
+                            td 
+                                div()
+                                    button(class="row-btn edit") Sửa
+                                    button(class="row-btn delete") Xóa
+                        tr
+                            td 2
+                            td khanhkk
+                            td 
+                                div
+                                    button(class="row-btn edit") Sửa
+                                    button(class="row-btn delete") Xóa
 
+            div(id="Friends", class="tabcontent")
+                h3 Friends
                 div
-                    p(style="margin-bottom: 5px;") Tin nhắn
-                    textarea(name="message", id="message", style="width: 100%", rows="4")
+                    form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+                        div(class="form-item")
+                            p(style="margin-bottom: 5px;") Số điện thoại 
+                            input(type="text", name="phone", id="phone-number")
 
+                        //- div
+                        //-     p(style="margin-bottom: 5px;") Tin nhắn
+                        //-     textarea(name="message", id="message", style="width: 100%", rows="4")
+
+                        //- div
+                        //-     p(style="margin-bottom: 5px;") Cookies
+                        //-     textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+
+                    //- div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                    //-     button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
+                    //-     button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
+                    div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                        button(type="button", id='add-frd', class="btn add-friend") Kết bạn
+                        //- button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
+
+            div(id="MessageBox", class="tabcontent")
+                h3 Cài đặt lịch nhắn tin
                 div
-                    p(style="margin-bottom: 5px;") Cookies
-                    textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+                    form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+                        div(class="form-item")
+                            p(style="margin-bottom: 5px;") Số điện thoại 
+                            input(type="text", name="phone", id="phone-number")
 
-            div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
-                button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
-            div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
-                button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
+                        div(class="form-item")
+                            p(style="margin-bottom: 5px;") Tin nhắn
+                            textarea(name="message", id="message", rows="4")
+
+                        //- div
+                        //-     p(style="margin-bottom: 5px;") Cookies
+                        //-     textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+
+                    //- div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                    //-     button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
+                    //-     button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
+                    div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                        //- button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
+                        button(type="button", id='send-message', class="btn send-ms") Gửi tin nhắn
+
+        div(class="modal hide", id="add-account")
+            div(class="modal-content")
+                <span class="close">&times;</span>
+                div(class="header")
+                    h2 Tài khoản
+
+                div(class="modal-body")
+                    div(class="form-item")
+                        div
+                            p(style="margin-bottom: 5px;") SĐT
+                            input(class="phone", name="phone", type="text", autocomplete="off")
+
+                    div(class="form-item")
+                        div
+                            p(style="margin-bottom: 5px;") Mật khẩu
+                            input(class="password", name="password", type="password", autocomplete="off")
+
+                    div(class="form-item")
+                        div
+                            p(style="margin-bottom: 5px;") Xác nhận mật khẩu
+                            input(class="cf-password", name="cf-password", type="password", autocomplete="off")
+
+                    div(class="form-item")
+                        p(style="margin-bottom: 5px;") Cookies
+                        textarea(class="cookies", name="cookies", id="cookies", style="width: 100%", rows="6")
+
+                    div(style="float: right;")
+                        button(class="btn cancel") Hủy
+                        button(class="btn submit") Lưu
+
+        //- div(style="width: 100%; float: left;")
+        //-     form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+        //-         div
+        //-             p(style="margin-bottom: 5px;") Số điện thoại 
+        //-             input(type="text", name="phone", id="phone-number", style="width: 100%")
+
+        //-         div
+        //-             p(style="margin-bottom: 5px;") Tin nhắn
+        //-             textarea(name="message", id="message", style="width: 100%", rows="4")
+
+        //-         div
+        //-             p(style="margin-bottom: 5px;") Cookies
+        //-             textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+
+        //-     div(style="margin-top: 20px; margin-left: 0%; display:flex")
+        //-         button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
+        //-         button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
+        //-     div(style="margin-top: 20px; margin-left: 0%; display:flex")
+        //-         button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
+        //-         button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
 
 

@@ -1,0 +1,174 @@
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Kaka
+        script(src="https://code.jquery.com/jquery-3.6.3.min.js") 
+        script.
+            $(document).ready(async function(){
+                function showLoading(){
+                    $('#loading-view').show();
+                }
+
+                function closeLoading(){
+                    $('#loading-view').hide();
+                }
+
+                $('#send-message').unbind('click').on('click', function(){
+                    showLoading();
+                    //const formData = new FormData();
+
+                    //- if($('#shareholder-list')[0].files[0] && !$('#shareholder-list')[0].files[0]?.name.endsWith('.xlsx')){
+                    //-     alert('Mẫu thư phải là file .xlsx')
+                    //-     closeLoading();
+                    //-     return;
+                    //- }
+
+                    //- formData.append("shareholder-list", $('#shareholder-list')[0].files[0]);
+                    //- formData.append("phone", $('#phone-number').val());
+                    //- formData.append("message", $('#message').val());
+
+                    $.post('/send', 
+                    { 
+                        phone: $('#phone-number').val(), 
+                        message: $('#message').val() 
+                    }, function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                            //$('form input').val('');
+                            $('form textarea').val('');
+                            alert(data.message)
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+
+                    //- $.ajax({
+                    //-     type:'post',
+                    //-     url: '/send',
+                    //-     data: formData,
+                    //-     processData: false,
+                    //-     contentType: false,
+                    //-     success: function(data){
+                    //-         closeLoading();
+                    //-         if(data.code == 200){
+                    //-             $('form input').val('');
+                    //-             $('form textarea').val('');
+                    //-         }
+                    //-         else{
+                    //-             alert(data.message)
+                    //-         }
+                    //-     },
+                    //-     error: function(err){
+                    //-         if(err.status == 500){
+                    //-             alert(err.statusText)
+                    //-         }
+                    //-         else{
+                    //-             console.log(err.error);
+                    //-         }
+                    //-         closeLoading();
+                    //-     }
+                    //- })
+                })
+
+                $('#add-frd').unbind('click').on('click', function(){
+                    showLoading();
+                    //- const formData = new FormData();
+                    //- formData.append("phone", $('#phone-number').val());
+
+                    $.post('/add-friend', { phone: $('#phone-number').val() }, function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                            $('form input').val('');
+                            alert(data.message)
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+                    //- $.ajax({
+                    //-     type:'post',
+                    //-     url: '/add-friend',
+                    //-     data: formData,
+                    //-     processData: false,
+                    //-     contentType: false,
+                    //-     success: function(data){
+                    //-         console.log(data)
+                    //-         closeLoading();
+                    //-         if(data.code == 200){
+                    //-             $('form input').val('');
+                    //-         }
+                    //-         else{
+                    //-             alert(data.message)
+                    //-         }
+                    //-     },
+                    //-     error: function(err){
+                    //-         if(err.status == 500){
+                    //-             alert(err.statusText)
+                    //-         }
+                    //-         else{
+                    //-             console.log(err.error);
+                    //-         }
+                    //-         closeLoading();
+                    //-     }
+                    //- })
+                })
+
+                $('#login').unbind('click').on('click', function(){
+                    showLoading();
+                    $.get('/login', function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                            alert(data.message)
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+                })
+
+                $('#add-cookies').unbind('click').on('click', function(){
+                    showLoading();
+
+                    $.post('/add-cookies', { cookies: $('#cookies').val() }, function(data){
+                        closeLoading();
+                        if(data.code == 200){
+                            $('#cookies').val('');
+                            alert(data.message)
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+                })
+            })
+
+    body(style="margin: 0; height:100vh;")
+
+    div(style="display: none; height: 100%; width: 100%; position: fixed; z-index: 999; background-color: rgb(79 178 98 / 76%)", id="loading-view")
+        h1(style="position:absolute; top: 35%; left: 45%; font-size: 45px; color: #073a07") Đang xử lý....
+    div(style="margin: 0 auto; padding-top: 12%; max-width: 500px")
+        h1(style="margin: 0") Kết bạn 4fun
+    
+        div(style="width: 100%; float: left;")
+            form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+                div
+                    p(style="margin-bottom: 5px;") Số điện thoại 
+                    input(type="text", name="phone", id="phone-number", style="width: 100%")
+
+                div
+                    p(style="margin-bottom: 5px;") Tin nhắn
+                    textarea(name="message", id="message", style="width: 100%", rows="4")
+
+                div
+                    p(style="margin-bottom: 5px;") Cookies
+                    textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+
+            div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
+                button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
+            div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
+                button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn

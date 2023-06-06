@@ -5,6 +5,8 @@ const slugify = require('slugify');
 const path = require('path');
 const morgan = require('morgan');
 const fs = require('fs');
+const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -57,6 +59,13 @@ app.get('/', function (req, res) {
     res.render('index');
 });
 
+//load enviroment variables
+const result = dotenv.config();
+if (result.error) {
+    throw result.error;
+}
+console.log(process.env.DB_URI);
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -67,8 +76,24 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(morgan('combined'));
 
-app.listen(8000);
-console.log('Server is running....');
+//connect MongoDB
+mongoose.connect(
+    process.env.DB_URI,
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    },
+    function (err) {
+        if (err) {
+            console.log(`Mongo connected error ${err}`);
+        } else {
+            console.log('Mongo connected');
+        }
+    },
+);
+
+app.listen(process.env.PORT);
+console.log(`Server is running in port ${process.env.PORT}....`);
 
 const PHONE_REGEX = /([84|0]+(3|5|7|8|9){1})+([0-9]{8})\b/g;
 
@@ -248,7 +273,7 @@ app.post('/send', async (req, res) => {
             //{ delay: 300 }
         );
 
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(1000);
 
         //choose a friend to send message
         const chooseFriend = await page.$(
@@ -319,10 +344,10 @@ app.post('/add-friend', async (req, res) => {
     let browser;
     try {
         browser = await puppeteer.launch({
-            // headless: false,
-            // defaultViewport: false,
-            // executablePath:
-            //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
+            headless: false,
+            defaultViewport: false,
+            executablePath:
+                'C:/Program Files/Google/Chrome/Application/chrome.exe',
         });
 
         const page = (await browser.pages())[0];
@@ -356,7 +381,7 @@ app.post('/add-friend', async (req, res) => {
         );
         await searchFrBtn.click({});
 
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(1000);
 
         const sendMsgBtn = await page.$(
             'div[data-id="btn_UserProfile_SendMsg"]',
