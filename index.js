@@ -81,9 +81,16 @@ const getCookies = (cookieString) => {
     return cookies;
 };
 
+let AVAILABLE_COOKIES = [];
 const loginAccount = async (page) => {
-    const cookiesData = fs.readFileSync('cookies.json');
-    const cookies = getCookies(cookiesData.toString());
+    if (!AVAILABLE_COOKIES.length) {
+        const cookiesData = fs.readFileSync('cookies.json');
+        AVAILABLE_COOKIES = getCookies(cookiesData.toString());
+    }
+
+    if (!AVAILABLE_COOKIES.length) {
+        throw new Error('Invalid cookies');
+    }
 
     await page.goto(
         'https://id.zalo.me/account?continue=https://chat.zalo.me/',
@@ -94,7 +101,7 @@ const loginAccount = async (page) => {
         },
     );
 
-    await page.setCookie(...cookies);
+    await page.setCookie(...AVAILABLE_COOKIES);
     await page.reload();
 
     //choose manual login option
@@ -102,10 +109,7 @@ const loginAccount = async (page) => {
         'div.tabs ul li:nth-child(2) a',
     );
     if (!chooseManual) {
-        return res.json({
-            message: 'Error',
-            code: 400,
-        });
+        throw new Error('Not found login option');
     }
     await chooseManual.click();
 
@@ -124,10 +128,7 @@ const loginAccount = async (page) => {
         '.form-signin .has-2btn a.first',
     );
     if (!loginBtn) {
-        return res.json({
-            message: 'Error',
-            code: 400,
-        });
+        throw new Error('Cannot login into your account');
     }
     await loginBtn.click();
 };
@@ -212,7 +213,6 @@ app.post('/send', async (req, res) => {
     }
 
     phone = phone.replace(/\s/g, '').replace(/^\+/, '');
-
     // if (!PHONE_REGEX.test(phone)) {
     //     return res.json({
     //         message: 'Số điện thoại không hợp lệ',
@@ -223,19 +223,14 @@ app.post('/send', async (req, res) => {
     let browser;
     try {
         browser = await puppeteer.launch({
-            //headless: false,
-            //defaultViewport: false,
-            // executablePath:
-            //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
+            headless: false,
+            defaultViewport: false,
+            executablePath:
+                'C:/Program Files/Google/Chrome/Application/chrome.exe',
         });
 
         const page = (await browser.pages())[0];
         await loginAccount(page);
-
-        //waiting page load done
-        // await new Promise((resolve, reject) => {
-        //     setTimeout(resolve, 3000);
-        // });
 
         await page.waitForNavigation();
         console.log('logged in...');
@@ -244,12 +239,6 @@ app.post('/send', async (req, res) => {
         const enableInputPhone = await page.waitForSelector(
             '#contact-search-input',
         );
-        if (!enableInputPhone) {
-            return res.json({
-                message: 'Error',
-                code: 400,
-            });
-        }
         await enableInputPhone.click();
 
         //input phone to search
@@ -259,23 +248,22 @@ app.post('/send', async (req, res) => {
             //{ delay: 300 }
         );
 
+        await page.waitForTimeout(800);
+
         //choose a friend to send message
-        const chooseFriend = await page.waitForSelector(
+        const chooseFriend = await page.$(
             '#searchResultList #searchResultList .ReactVirtualized__Grid__innerScrollContainer div:nth-child(2) .conv-item__avatar',
-            { visible: true },
         );
         if (!chooseFriend) {
             return res.json({
-                message: 'Error',
+                message: 'Không tìm thấy tài khoản nhận tin nhắn',
                 code: 400,
             });
         }
         await chooseFriend.click();
 
         //waiting page load done
-        await new Promise((resolve, reject) => {
-            setTimeout(resolve, 1000);
-        });
+        await page.waitForSelector('#richInput', { timeout: 2000 });
 
         //input message
         await page.type(
@@ -288,21 +276,15 @@ app.post('/send', async (req, res) => {
         const sendMessageBtn = await page.waitForSelector(
             'div[data-translate-inner="STR_SEND"]',
         );
-        if (!sendMessageBtn) {
-            return res.json({
-                message: 'Error',
-                code: 400,
-            });
-        }
         await sendMessageBtn.click();
     } catch (ex) {
         console.log('Error: ', ex);
         return res.json({
-            message: 'Error',
+            message: 'Lỗi gửi tin nhắn',
             code: 400,
         });
     } finally {
-        //await browser.close();
+        await browser.close();
     }
 
     console.log('end time: ', new Date());
@@ -346,11 +328,6 @@ app.post('/add-friend', async (req, res) => {
         const page = (await browser.pages())[0];
         await loginAccount(page);
 
-        //waiting page load done
-        // await new Promise((resolve, reject) => {
-        //     setTimeout(resolve, 3000);
-        // });
-
         console.log('start waiting: ', new Date());
         await page.waitForNavigation();
 
@@ -364,12 +341,6 @@ app.post('/add-friend', async (req, res) => {
         const openAddFrModal = await page.waitForSelector(
             'div[data-id="btn_Main_AddFrd"]',
         );
-        if (!openAddFrModal) {
-            return res.json({
-                message: 'Error',
-                code: 400,
-            });
-        }
         await openAddFrModal.click();
 
         //input phone number
@@ -383,22 +354,37 @@ app.post('/add-friend', async (req, res) => {
         const searchFrBtn = await page.waitForSelector(
             'div[data-translate-inner="STR_SEARCH"]',
         );
-        if (!searchFrBtn) {
+        await searchFrBtn.click({});
+
+        await page.waitForTimeout(800);
+
+        const sendMsgBtn = await page.$(
+            'div[data-id="btn_UserProfile_SendMsg"]',
+        );
+        if (!sendMsgBtn) {
             return res.json({
-                message: 'Error',
+                message: 'Tài khoản không tồn tại.',
                 code: 400,
             });
         }
-        await searchFrBtn.click();
+
+        const cancelFrBtn = await page.$(
+            'div[data-id="btn_UserProfile_CXLFrdReq"]',
+        );
+        if (cancelFrBtn) {
+            return res.json({
+                message: 'Đã gửi lời kết bạn.',
+                code: 400,
+            });
+        }
 
         //confirm specified friend
-        const confirmFrBtn = await page.waitForSelector(
+        const confirmFrBtn = await page.$(
             'div[data-id="btn_UserProfile_AddFrd"]',
-            { timeout: 2000 },
         );
         if (!confirmFrBtn) {
             return res.json({
-                message: 'Error',
+                message: 'Số điện thoại đã có trong danh sách bạn bè.',
                 code: 400,
             });
         }
@@ -408,22 +394,16 @@ app.post('/add-friend', async (req, res) => {
         const addFrBtn = await page.waitForSelector(
             'div[data-id="btn_AddFrd_Add"]',
         );
-        if (!addFrBtn) {
-            return res.json({
-                message: 'Error',
-                code: 400,
-            });
-        }
         await addFrBtn.click();
     } catch (ex) {
         console.log('Error: ', ex);
         return res.json({
-            message: 'Error',
+            message: 'Lỗi gửi lời mời kết bạn',
             code: 400,
         });
     } finally {
         //close browser
-        //await browser.close();
+        await browser.close();
     }
 
     return res.json({
