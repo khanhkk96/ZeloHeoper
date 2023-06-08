@@ -9,6 +9,8 @@ html(lang="en")
         link(rel='stylesheet', type='text/css', href='/css/main.css')
         script(src="/js/main.js")
         script(src="/js/zaccount.js")
+        script(src="/js/invite-friend.js")
+        script(src="/js/send-message.js")
 
     body(style="margin: 0; height:100vh;")
 
@@ -66,9 +68,19 @@ html(lang="en")
                 h3 Friends
                 div
                     form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
-                        div(class="form-item")
+                        div 
+                            input(type="radio", value="file", name="type", class="radio-btn file-option", id="fr_file")
+                            label(for="fr_file") File
+                            input(type="radio", value="text", name="type", class="radio-btn text-option", id="fr_text", checked)
+                            label(for="fr_text") Text
+
+                        div(class="form-item text")
                             p(style="margin-bottom: 5px;") Số điện thoại 
                             input(type="text", name="phone", id="phone-number")
+
+                        div(class="form-item file hide")
+                            p(style="margin-bottom: 5px;") Danh sách số điện thoại 
+                            input(type="file", name="file", id="phone-file")
 
                         //- div
                         //-     p(style="margin-bottom: 5px;") Tin nhắn
@@ -89,9 +101,19 @@ html(lang="en")
                 h3 Cài đặt lịch nhắn tin
                 div
                     form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
-                        div(class="form-item")
+                        div 
+                            input(type="radio", value="file", name="type", class="radio-btn file-option", id="mb_file")
+                            label(for="mb_file") File
+                            input(type="radio", value="text", name="type", class="radio-btn text-option", id="mb_text", checked)
+                            label(for="mb_text") Text
+
+                        div(class="form-item text")
                             p(style="margin-bottom: 5px;") Số điện thoại 
                             input(type="text", name="phone", id="phone-number")
+
+                        div(class="form-item file hide")
+                            p(style="margin-bottom: 5px;") Danh sách số điện thoại 
+                            input(type="file", name="file", id="phone-file")
 
                         div(class="form-item")
                             p(style="margin-bottom: 5px;") Tin nhắn

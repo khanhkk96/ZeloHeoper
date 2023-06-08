@@ -68,8 +68,6 @@ console.log(`Server is running in port ${process.env.PORT}....`);
 //     signale.success(`Listening port ${process.env.PORT || 3030}`);
 // });
 
-const PHONE_REGEX = /([84|0]+(3|5|7|8|9){1})+([0-9]{8})\b/g;
-
 const getCookies = (cookieString) => {
     let cookies = [];
     if (cookieString) {

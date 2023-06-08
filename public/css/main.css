@@ -213,3 +213,11 @@ table th {
     padding: 10px;
     text-align: right;
 }
+
+.tabcontent .radio-btn{
+    margin: 5px;
+}
+
+.tabcontent label{
+    margin-right: 10px;
+}
