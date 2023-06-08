@@ -4,7 +4,7 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        title Kaka
+        title zaka
         script(src="https://code.jquery.com/jquery-3.6.3.min.js") 
         script.
             $(document).ready(async function(){
@@ -382,13 +382,21 @@ html(lang="en")
                 cursor: pointer;
             }
 
+            .container a{
+                width: 100%;
+                padding: 10px;
+                text-align: right;
+            }
+
     body(style="margin: 0; height:100vh;")
 
         div(id="loading-view")
             h1 Đang xử lý....
             
         div(class="container")
-            h1(style="margin: 0") 4Fun
+            div(style="display: flex;")
+                h1(style="margin: 0") 4Fun
+                a(href="logout") Đăng xuất
         
             div(class="tab")
                 button(class="tablinks active", onclick="openCity(event, 'Accounts')") Tài khoản
@@ -497,26 +505,5 @@ html(lang="en")
                     div(style="float: right;")
                         button(class="btn cancel") Hủy
                         button(class="btn submit") Lưu
-
-        //- div(style="width: 100%; float: left;")
-        //-     form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
-        //-         div
-        //-             p(style="margin-bottom: 5px;") Số điện thoại 
-        //-             input(type="text", name="phone", id="phone-number", style="width: 100%")
-
-        //-         div
-        //-             p(style="margin-bottom: 5px;") Tin nhắn
-        //-             textarea(name="message", id="message", style="width: 100%", rows="4")
-
-        //-         div
-        //-             p(style="margin-bottom: 5px;") Cookies
-        //-             textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
-
-        //-     div(style="margin-top: 20px; margin-left: 0%; display:flex")
-        //-         button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
-        //-         button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
-        //-     div(style="margin-top: 20px; margin-left: 0%; display:flex")
-        //-         button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
-        //-         button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
 
 

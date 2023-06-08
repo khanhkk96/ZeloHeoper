@@ -1,0 +1,54 @@
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Đăng nhập
+        script(src="https://code.jquery.com/jquery-3.6.3.min.js") 
+        script.
+            $(document).ready(async function(){
+                function showLoading(){
+                    $('#loading-view').show();
+                }
+
+                function closeLoading(){
+                    $('#loading-view').hide();
+                }
+
+                $('#login').unbind('click').on('click', function(){
+                    showLoading();
+                    $.post('/user/login', { 
+                        phone: $('#phone-number').val(),
+                        password: $('#password').val(),
+                     }, function(data){
+                        closeLoading();
+                        if(data.statusCode == 200){
+                            window.location.href = '/user/home';
+                        }
+                        else{
+                            alert(data.message)
+                        }
+                    })
+                })
+            })
+
+    body(style="margin: 0; height:100vh;")
+
+    div(style="display: none; height: 100%; width: 100%; position: fixed; z-index: 999; background-color: rgb(79 178 98 / 76%)", id="loading-view")
+        h1(style="position:absolute; top: 35%; left: 45%; font-size: 45px; color: #073a07") Đang xử lý....
+    div(style="margin: 0 auto; padding-top: 12%; max-width: 350px")
+        h1(style="margin: 0") Đăng nhập
+    
+        div(style="width: 100%; float: left;")
+            form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+                div
+                    p(style="margin-bottom: 5px;") Tài khoản 
+                    input(type="text", name="phone", id="phone-number", style="width: 100%")
+
+                div
+                    p(style="margin-bottom: 5px;") Mật khẩu
+                    input(name="password", id="password", type="password", style="width: 100%")
+
+            div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                //- button(type="button", id='forgot-password', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Quên mật khẩu
+                button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập

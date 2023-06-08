@@ -1,63 +1,16 @@
 const puppeteer = require('puppeteer');
-const multer = require('multer');
 const express = require('express');
-const slugify = require('slugify');
 const path = require('path');
 const morgan = require('morgan');
 const fs = require('fs');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads');
-    },
-    filename: function (req, file, cb) {
-        file.originalname = Buffer.from(file.originalname, 'latin1').toString(
-            'utf8',
-        );
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e2);
-        const ext = path.extname(file.originalname);
-        cb(
-            null,
-            slugify(path.parse(file.originalname).name, {
-                replacement: '-', // replace spaces with replacement character, defaults to `-`
-                remove: undefined, // remove characters that match regex, defaults to `undefined`
-                lower: false, // convert to lower case, defaults to `false`
-                strict: false, // strip special characters except replacement, defaults to `false`
-                locale: 'vi', // language code of the locale to use
-                trim: true,
-            }) +
-                '-' +
-                uniqueSuffix +
-                ext,
-        );
-    },
-});
-
-const upload = multer({
-    dest: './uploads/',
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024,
-    },
-    fileFilter: function (req, file, callback) {
-        console.log(file);
-        var ext = path.extname(file.originalname);
-
-        if (ext !== '.xlsx') {
-            return callback(new Error('File upload must be .xlsx file'), false);
-        }
-
-        callback(null, true);
-    },
-});
+const initRouter = require('./routes');
+const session = require('express-session');
+// const http = require('http');
+// const signale = require('signale');
 
 var app = express();
-
-app.get('/', function (req, res) {
-    res.render('index');
-});
 
 //load enviroment variables
 const result = dotenv.config();
@@ -70,9 +23,19 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.set('trust proxy', 1); // trust first proxy
+app.use(
+    session({
+        secret: 'zakakaza',
+        resave: false,
+        saveUninitialized: true,
+        // cookie: { secure: true },
+    }),
+);
 
 app.use(morgan('combined'));
 
@@ -80,8 +43,9 @@ app.use(morgan('combined'));
 mongoose.connect(
     process.env.DB_URI,
     {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        // useNewUrlParser: true,
+        // useUnifiedTopology: true,
+        autoCreate: true,
     },
     function (err) {
         if (err) {
@@ -92,8 +56,17 @@ mongoose.connect(
     },
 );
 
+//init router
+initRouter(app);
+
 app.listen(process.env.PORT);
 console.log(`Server is running in port ${process.env.PORT}....`);
+
+// const server = http.createServer(app);
+// //start server
+// server.listen(process.env.PORT || 3030, () => {
+//     signale.success(`Listening port ${process.env.PORT || 3030}`);
+// });
 
 const PHONE_REGEX = /([84|0]+(3|5|7|8|9){1})+([0-9]{8})\b/g;
 
