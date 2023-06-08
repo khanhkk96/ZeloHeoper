@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const mongoose_delete = require('mongoose-delete');
+const { softDeletePlugin } = require('soft-delete-plugin-mongoose');
 const bcrypt = require('bcrypt');
 
 const UserSchema = new Schema(
@@ -38,7 +38,7 @@ const UserSchema = new Schema(
     },
 );
 
-UserSchema.plugin(mongoose_delete);
+UserSchema.plugin(softDeletePlugin);
 
 UserSchema.pre('save', async function (next) {
     if (this.isNew || this.isModified('password')) {

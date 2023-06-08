@@ -31,11 +31,11 @@ module.exports = {
         }
 
         //login success
-        return new AppRequestReturn(
-            200,
-            'Đăng nhâp tài khoản thành công.',
-            user,
-        );
+        return new AppRequestReturn(200, 'Đăng nhâp tài khoản thành công.', {
+            id: user.id,
+            name: user.name,
+            phone: user.phone,
+        });
     },
 
     async register({ phone, password, name, email }) {

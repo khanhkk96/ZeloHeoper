@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const mongoose_delete = require('mongoose-delete');
+const { softDeletePlugin } = require('soft-delete-plugin-mongoose');
 
 const ZlAccountSchema = new Schema(
     {
@@ -22,10 +22,14 @@ const ZlAccountSchema = new Schema(
             type: String,
             required: true,
         },
+        inUse: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true },
 );
 
-ZlAccountSchema.plugin(mongoose_delete);
+ZlAccountSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('ZlAccount', ZlAccountSchema);

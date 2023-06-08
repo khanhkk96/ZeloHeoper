@@ -6,387 +6,9 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title zaka
         script(src="https://code.jquery.com/jquery-3.6.3.min.js") 
-        script.
-            $(document).ready(async function(){
-                function showLoading(){
-                    $('#loading-view').show();
-                }
-
-                function closeLoading(){
-                    $('#loading-view').hide();
-                }
-
-                $('#send-message').unbind('click').on('click', function(){
-                    showLoading();
-                    //const formData = new FormData();
-
-                    //- if($('#shareholder-list')[0].files[0] && !$('#shareholder-list')[0].files[0]?.name.endsWith('.xlsx')){
-                    //-     alert('Mẫu thư phải là file .xlsx')
-                    //-     closeLoading();
-                    //-     return;
-                    //- }
-
-                    //- formData.append("shareholder-list", $('#shareholder-list')[0].files[0]);
-                    //- formData.append("phone", $('#phone-number').val());
-                    //- formData.append("message", $('#message').val());
-
-                    $.post('/send', 
-                    { 
-                        phone: $('#phone-number').val(), 
-                        message: $('#message').val() 
-                    }, function(data){
-                        closeLoading();
-                        if(data.code == 200){
-                            //$('form input').val('');
-                            $('form textarea').val('');
-                            alert(data.message)
-                        }
-                        else{
-                            alert(data.message)
-                        }
-                    })
-
-                    //- $.ajax({
-                    //-     type:'post',
-                    //-     url: '/send',
-                    //-     data: formData,
-                    //-     processData: false,
-                    //-     contentType: false,
-                    //-     success: function(data){
-                    //-         closeLoading();
-                    //-         if(data.code == 200){
-                    //-             $('form input').val('');
-                    //-             $('form textarea').val('');
-                    //-         }
-                    //-         else{
-                    //-             alert(data.message)
-                    //-         }
-                    //-     },
-                    //-     error: function(err){
-                    //-         if(err.status == 500){
-                    //-             alert(err.statusText)
-                    //-         }
-                    //-         else{
-                    //-             console.log(err.error);
-                    //-         }
-                    //-         closeLoading();
-                    //-     }
-                    //- })
-                })
-
-                $('#add-frd').unbind('click').on('click', function(){
-                    showLoading();
-                    //- const formData = new FormData();
-                    //- formData.append("phone", $('#phone-number').val());
-
-                    $.post('/add-friend', { phone: $('#phone-number').val() }, function(data){
-                        closeLoading();
-                        if(data.code == 200){
-                            $('form input').val('');
-                            alert(data.message)
-                        }
-                        else{
-                            alert(data.message)
-                        }
-                    })
-                    //- $.ajax({
-                    //-     type:'post',
-                    //-     url: '/add-friend',
-                    //-     data: formData,
-                    //-     processData: false,
-                    //-     contentType: false,
-                    //-     success: function(data){
-                    //-         console.log(data)
-                    //-         closeLoading();
-                    //-         if(data.code == 200){
-                    //-             $('form input').val('');
-                    //-         }
-                    //-         else{
-                    //-             alert(data.message)
-                    //-         }
-                    //-     },
-                    //-     error: function(err){
-                    //-         if(err.status == 500){
-                    //-             alert(err.statusText)
-                    //-         }
-                    //-         else{
-                    //-             console.log(err.error);
-                    //-         }
-                    //-         closeLoading();
-                    //-     }
-                    //- })
-                })
-
-                $('#login').unbind('click').on('click', function(){
-                    showLoading();
-                    $.get('/login', function(data){
-                        closeLoading();
-                        if(data.code == 200){
-                            alert(data.message)
-                        }
-                        else{
-                            alert(data.message)
-                        }
-                    })
-                })
-
-                $('#add-cookies').unbind('click').on('click', function(){
-                    showLoading();
-
-                    $.post('/add-cookies', { cookies: $('#cookies').val() }, function(data){
-                        closeLoading();
-                        if(data.code == 200){
-                            $('#cookies').val('');
-                            alert(data.message)
-                        }
-                        else{
-                            alert(data.message)
-                        }
-                    })
-                })
-
-                $('.modal .cancel').unbind('click').on('click', function(){
-                    $(this).parents('div.modal').hide();
-                });
-
-                $('.modal .close').unbind('click').on('click', function(){
-                    $(this).parents('div.modal').hide();
-                });
-            })
-
-            function openCity(evt, cityName) {
-                var i, tabcontent, tablinks;
-                tabcontent = document.getElementsByClassName("tabcontent");
-                for (i = 0; i < tabcontent.length; i++) {
-                    tabcontent[i].style.display = "none";
-                }
-                tablinks = document.getElementsByClassName("tablinks");
-                for (i = 0; i < tablinks.length; i++) {
-                    tablinks[i].className = tablinks[i].className.replace(" active", "");
-                }
-                document.getElementById(cityName).style.display = "block";
-                evt.currentTarget.className += " active";
-            }
-
-        style.
-            #loading-view{
-                display: none; 
-                height: 100%; 
-                width: 100%; 
-                position: fixed; 
-                z-index: 999; 
-                background-color: rgb(79 178 98 / 76%);
-            }
-
-            #loading-view h1{
-                position:absolute;
-                 top: 30%; 
-                 left: 45%; 
-                 font-size: 45px; 
-                 color: #073a07;
-            }
-
-            .container{
-                margin: 0 auto; 
-                padding-top: 8%; 
-                max-width: 800px
-            }
-
-            /* Style the tab */
-            .tab {
-                overflow: hidden;
-                border: 1px solid #ccc;
-                background-color: #f1f1f1;
-            }
-
-            /* Style the buttons inside the tab */
-            .tab button {
-                background-color: inherit;
-                float: left;
-                border: none;
-                outline: none;
-                cursor: pointer;
-                padding: 14px 16px;
-                transition: 0.3s;
-                font-size: 17px;
-            }
-
-            /* Change background color of buttons on hover */
-            .tab button:hover {
-                background-color: #ddd;
-            }
-
-            /* Create an active/current tablink class */
-            .tab button.active {
-                background-color: #ccc;
-            }
-
-            /* Style the tab content */
-            .tabcontent {
-                display: none;
-                padding: 6px 12px;
-                border: 1px solid #ccc;
-                border-top: none;
-            }
-
-            .btn.add-friend{
-                min-width: 100px; 
-                min-height: 40px; 
-                margin-right: 20px; 
-                background-color: #55a6f7; 
-                color: white; 
-                border: 0;
-            }
-
-            .btn.send-ms{
-                min-width: 100px; 
-                min-height: 40px; 
-                background-color: #16a529; 
-                color: white; 
-                border: 0; 
-                margin-right: 20px;
-            }
-
-            .btn.submit{
-                min-width: 100px; 
-                min-height: 40px; 
-                background-color: #0061c2; 
-                color: white; 
-                border: 0; 
-                margin-right: 20px;
-            }
-
-            .btn.cancel{
-                min-width: 100px; 
-                min-height: 40px; 
-                background-color: red; 
-                color: white; 
-                border: 0; 
-                margin-right: 20px;
-            }
-
-            .form-item input{
-                height: 28px;
-            }
-
-            .form-item input, .form-item textarea{
-                width: 100%;
-                font-size: 11pt;
-            }
-
-            .hide{
-                display: none;
-            }
-
-            .show{
-                display: block;
-            }
-
-            table {
-                font-family: Arial, Helvetica, sans-serif;
-                border-collapse: collapse;
-                width: 100%;
-            }
-
-            table td, table th {
-                border: 1px solid #ddd;
-                padding: 8px;
-            }
-
-            table tr:nth-child(even){background-color: #f2f2f2;}
-
-            table tr:hover {background-color: #ddd;}
-
-            table th {
-                padding-top: 12px;
-                padding-bottom: 12px;
-                text-align: left;
-                background-color: #004f8b;
-                color: white;
-            }
-
-            .container .tabcontent .button-groups{
-                margin: 10px 0;
-            }
-
-            .container .tabcontent .button-groups .table-btn{
-                min-width: 70px;
-                height: 30px;
-                margin-right: 10px;
-            }
-
-            .container .tabcontent .button-groups .table-btn.add{
-                background-color: #1bba1b;
-                color: white;
-                border: 0
-            }
-
-            .container .tabcontent .button-groups .table-btn.delete{
-                background-color: #b30808;
-                color: white;
-                border: 0
-            }
-
-            .container .tabcontent .row-btn{
-                margin-right: 5px;
-                padding: 5px 10px;
-            }
-
-            .container .tabcontent .row-btn.delete{
-                background-color: #b30808;
-                color: white;
-                border: 0
-            }
-
-            .container .tabcontent .row-btn.edit{
-                background-color: #09297e;
-                color: white;
-                border: 0
-            }
-
-            .modal {
-                display: none; /* Hidden by default */
-                position: fixed; /* Stay in place */
-                z-index: 1; /* Sit on top */
-                padding-top: 100px; /* Location of the box */
-                left: 0;
-                top: 0;
-                width: 100%; /* Full width */
-                height: 100%; /* Full height */
-                overflow: auto; /* Enable scroll if needed */
-                background-color: rgb(0,0,0); /* Fallback color */
-                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-            }
-
-            /* Modal Content */
-            .modal-content {
-                background-color: #fefefe;
-                margin: auto;
-                padding: 20px;
-                border: 1px solid #888;
-                width: 500px;
-            }
-
-            /* The Close Button */
-            .close {
-                color: #aaaaaa;
-                float: right;
-                font-size: 28px;
-                font-weight: bold;
-            }
-
-            .close:hover,
-            .close:focus {
-                color: #000;
-                text-decoration: none;
-                cursor: pointer;
-            }
-
-            .container a{
-                width: 100%;
-                padding: 10px;
-                text-align: right;
-            }
+        link(rel='stylesheet', type='text/css', href='/css/main.css')
+        script(src="/js/main.js")
+        script(src="/js/zaccount.js")
 
     body(style="margin: 0; height:100vh;")
 
@@ -414,21 +36,31 @@ html(lang="en")
                         tr
                             th STT
                             th Tài khoản 
+                            th Trạng thái 
                             th Thao tác
-                        tr
-                            td 1
-                            td khanhkk
-                            td 
-                                div()
-                                    button(class="row-btn edit") Sửa
-                                    button(class="row-btn delete") Xóa
-                        tr
-                            td 2
-                            td khanhkk
-                            td 
-                                div
-                                    button(class="row-btn edit") Sửa
-                                    button(class="row-btn delete") Xóa
+                        tbody(id="zaccount-table")
+                            tr
+                                td 1
+                                td khanhkk
+                                td 
+                                    div
+                                        span Đang kích hoạt
+                                        button(class="row-btn pick-up hide") Kích hoạt
+                                td 
+                                    div
+                                        button(class="row-btn edit") Sửa
+                                        button(class="row-btn delete") Xóa
+                            tr
+                                td 2
+                                td khanhkk
+                                td
+                                    div
+                                        span Chưa kích hoạt
+                                        button(class="row-btn pick-up") Kích hoạt
+                                td 
+                                    div
+                                        button(class="row-btn edit") Sửa
+                                        button(class="row-btn delete") Xóa
 
             div(id="Friends", class="tabcontent")
                 h3 Friends
@@ -486,12 +118,13 @@ html(lang="en")
                     div(class="form-item")
                         div
                             p(style="margin-bottom: 5px;") SĐT
+                            input(type="hidden", id="hidden-za")
                             input(class="phone", name="phone", type="text", autocomplete="off")
 
                     div(class="form-item")
                         div
                             p(style="margin-bottom: 5px;") Mật khẩu
-                            input(class="password", name="password", type="password", autocomplete="off")
+                            input(class="password", name="password", type="password", id="pwd", autocomplete="new-password")
 
                     div(class="form-item")
                         div
@@ -505,5 +138,20 @@ html(lang="en")
                     div(style="float: right;")
                         button(class="btn cancel") Hủy
                         button(class="btn submit") Lưu
+
+        div(class="modal hide", id="confirm-delete")
+            div(class="modal-content")
+                <span class="close">&times;</span>
+                div(class="header")
+                    h2(style="color: red;") Xóa
+
+                div(class="modal-body")
+                    div(class="form-item")
+                        div
+                            h4(style="margin-bottom: 25px;") Bạn chắc chắn muốn xóa tài khoản này???
+
+                    div(style="float: right;")
+                        button(class="btn cancel") Hủy
+                        button(class="btn submit") Đồng ý
 
 

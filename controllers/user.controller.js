@@ -9,7 +9,7 @@ module.exports = {
                 phone: loginResult.data.phone,
                 email: loginResult.data.email,
                 level: loginResult.data.level,
-                id: loginResult.data.id,
+                userId: loginResult.data.id,
             };
         }
 

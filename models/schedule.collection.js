@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const mongoose_delete = require('mongoose-delete');
+const { softDeletePlugin } = require('soft-delete-plugin-mongoose');
 
 const ScheduleSchema = new Schema(
     {
@@ -29,6 +29,6 @@ const ScheduleSchema = new Schema(
     { timestamps: true },
 );
 
-ScheduleSchema.plugin(mongoose_delete);
+ScheduleSchema.plugin(softDeletePlugin);
 
 module.exports = mongoose.model('schedules', ScheduleSchema);

@@ -23,6 +23,7 @@ html(lang="en")
                      }, function(data){
                         closeLoading();
                         if(data.statusCode == 200){
+                            //localStorage.setItem("cur_user", data.data);
                             window.location.href = '/user/home';
                         }
                         else{
