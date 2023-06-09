@@ -67,7 +67,7 @@ html(lang="en")
             div(id="Friends", class="tabcontent")
                 h3 Friends
                 div
-                    form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+                    form(method="POST", id="invite-form", action="/start", enctype="multipart/form-data", style="max-width: 250px")
                         div 
                             input(type="radio", value="file", name="type", class="radio-btn file-option", id="fr_file")
                             label(for="fr_file") File
@@ -76,31 +76,19 @@ html(lang="en")
 
                         div(class="form-item text")
                             p(style="margin-bottom: 5px;") Số điện thoại 
-                            input(type="text", name="phone", id="phone-number")
+                            input(type="text", name="phone", class="phone-number")
 
                         div(class="form-item file hide")
                             p(style="margin-bottom: 5px;") Danh sách số điện thoại 
-                            input(type="file", name="file", id="phone-file")
+                            input(type="file", name="file", accept=".txt", class="phone-file")
 
-                        //- div
-                        //-     p(style="margin-bottom: 5px;") Tin nhắn
-                        //-     textarea(name="message", id="message", style="width: 100%", rows="4")
-
-                        //- div
-                        //-     p(style="margin-bottom: 5px;") Cookies
-                        //-     textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
-
-                    //- div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                    //-     button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
-                    //-     button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
                     div(style="margin-top: 20px; margin-left: 0%; display:flex")
                         button(type="button", id='add-frd', class="btn add-friend") Kết bạn
-                        //- button(type="button", id='send-message', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Gửi tin nhắn
 
             div(id="MessageBox", class="tabcontent")
                 h3 Cài đặt lịch nhắn tin
                 div
-                    form(method="POST", action="/start", enctype="multipart/form-data", style="max-width: 250px")
+                    form(method="POST", id="send-form", action="/start", enctype="multipart/form-data", style="max-width: 250px")
                         div 
                             input(type="radio", value="file", name="type", class="radio-btn file-option", id="mb_file")
                             label(for="mb_file") File
@@ -109,26 +97,22 @@ html(lang="en")
 
                         div(class="form-item text")
                             p(style="margin-bottom: 5px;") Số điện thoại 
-                            input(type="text", name="phone", id="phone-number")
+                            input(type="text", name="phone", class="phone-number")
 
                         div(class="form-item file hide")
                             p(style="margin-bottom: 5px;") Danh sách số điện thoại 
-                            input(type="file", name="file", id="phone-file")
+                            input(type="file", name="file", accept=".txt", class="phone-file")
 
                         div(class="form-item")
                             p(style="margin-bottom: 5px;") Tin nhắn
-                            textarea(name="message", id="message", rows="4")
+                            textarea(name="message", id="message", class="message", rows="4")
 
-                        //- div
-                        //-     p(style="margin-bottom: 5px;") Cookies
-                        //-     textarea(name="cookies", id="cookies", style="width: 100%", rows="6")
+                        div(class="form-item")
+                            p(style="margin-bottom: 5px;") Thời gian 
+                            input(type="datetime-local", name="time", class="send-time")
 
-                    //- div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                    //-     button(type="button", id='add-cookies', style="min-width: 100px; min-height: 40px; background-color: #55a6f7; color: white; border: 0; margin-right: 20px;") Thêm cookies
-                    //-     button(type="button", id='login', style="min-width: 100px; min-height: 40px; background-color: #16a529; color: white; border: 0; margin-right: 20px;") Đăng nhập
                     div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                        //- button(type="button", id='add-frd', style="min-width: 100px; min-height: 40px; margin-right: 20px; background-color: #55a6f7; color: white; border: 0;") Kết bạn
-                        button(type="button", id='send-message', class="btn send-ms") Gửi tin nhắn
+                        button(type="button", id='send-ms', class="btn send-ms") Gửi tin nhắn
 
         div(class="modal hide", id="add-account")
             div(class="modal-content")

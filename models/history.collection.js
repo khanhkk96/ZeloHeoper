@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ActionResult, ActionType } = require('../common/constants');
 const Schema = mongoose.Schema;
 
 const HistorySchema = new Schema(
@@ -15,7 +16,8 @@ const HistorySchema = new Schema(
         },
         actionType: {
             type: String,
-            enum: ['INVITING', 'SENDING'],
+            require: true,
+            enum: [ActionType.INVITATION, ActionType.SENDING],
         },
         phone: {
             type: String,
@@ -26,8 +28,11 @@ const HistorySchema = new Schema(
         },
         result: {
             type: String,
-            enum: ['SUCCESS', 'FAILURE'],
-            default: 'SUCCESS',
+            enum: [ActionResult.SUCCESS, ActionResult.FAILURE],
+            default: ActionResult.SUCCESS,
+        },
+        note: {
+            type: String,
         },
     },
     { timestamps: true },

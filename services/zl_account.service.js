@@ -165,6 +165,17 @@ module.exports = {
             );
         }
 
-        return new AppRequestReturn(200, 'Kích hoạt tài khoản thành công.');
+        return new AppRequestReturn(
+            200,
+            'Kích hoạt tài khoản thành công.',
+            activedAccount,
+        );
+    },
+
+    getActiveAccount: async (userId) => {
+        return await ZlAccount.findOne({
+            user: userId,
+            inUse: true,
+        });
     },
 };

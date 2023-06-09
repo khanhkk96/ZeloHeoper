@@ -1,6 +1,7 @@
 {
     "dependencies": {
         "bcrypt": "^5.1.0",
+        "cron": "^2.3.1",
         "dotenv": "^16.1.4",
         "express": "^4.18.2",
         "express-session": "^1.17.3",
@@ -10,8 +11,7 @@
         "puppeteer": "^20.5.0",
         "signale": "^1.4.0",
         "slugify": "^1.6.6",
-        "soft-delete-plugin-mongoose": "^1.0.15",
-        "xlsx": "^0.18.5"
+        "soft-delete-plugin-mongoose": "^1.0.15"
     },
     "scripts": {
         "start": "nodemon index.js"

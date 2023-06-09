@@ -1,4 +1,5 @@
 const userService = require('../services/user.service');
+const accountService = require('../services/zl_account.service');
 
 module.exports = {
     async login(req, res) {
@@ -11,6 +12,12 @@ module.exports = {
                 level: loginResult.data.level,
                 userId: loginResult.data.id,
             };
+        }
+        const account = await accountService.getActiveAccount(
+            loginResult.data.id,
+        );
+        if (account) {
+            req.session.activeAccount = account;
         }
 
         return res.json(loginResult);

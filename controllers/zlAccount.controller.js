@@ -28,6 +28,8 @@ module.exports = {
 
     //select account to take action
     pick: async (req, res) => {
-        res.json(await zlAccountService.choose(req.params, req.user));
+        const result = await zlAccountService.choose(req.params, req.user);
+        req.session.activeAccount = result.data;
+        res.json(result);
     },
 };

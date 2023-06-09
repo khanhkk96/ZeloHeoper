@@ -1,14 +1,5 @@
 module.exports = {
-    loginAccount: async (page, cookies) => {
-        // if (!AVAILABLE_COOKIES.length) {
-        //     const cookiesData = fs.readFileSync('cookies.json');
-        //     AVAILABLE_COOKIES = getCookies(cookiesData.toString());
-        // }
-
-        // if (!AVAILABLE_COOKIES.length) {
-        //     throw new Error('Invalid cookies');
-        // }
-
+    loginAccount: async (page, password, cookies) => {
         await page.goto(
             'https://id.zalo.me/account?continue=https://chat.zalo.me/',
             {
@@ -33,8 +24,7 @@ module.exports = {
         //input password
         await page.type(
             '.form-signin .line-form input[type="password"]',
-            'Kaymouse.28',
-            //{ delay: 200 },
+            password,
         );
 
         //login into account

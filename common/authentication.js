@@ -6,6 +6,7 @@ function authenticate(req, res, next) {
     }
 
     req.user = req.session.user;
+    req.activeAccount = req.session.activeAccount;
     next();
 }
 

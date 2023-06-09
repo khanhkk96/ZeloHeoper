@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const uploadOnlyExcel = multer({
+const uploadOnlyTxt = multer({
     dest: './uploads/',
     storage: storage,
     limits: {
@@ -39,12 +39,12 @@ const uploadOnlyExcel = multer({
         console.log(file);
         var ext = path.extname(file.originalname);
 
-        if (ext !== '.xlsx') {
-            return callback(new Error('File upload must be .xlsx file'), false);
+        if (ext !== '.txt') {
+            return callback(new Error('File upload must be .txt file'), false);
         }
 
         callback(null, true);
     },
-});
+}).single('file');
 
-module.exports = { uploadOnlyExcel };
+module.exports = { uploadOnlyTxt };
