@@ -1,5 +1,10 @@
 module.exports = {
     loginAccount: async (page, password, cookies) => {
+        const cookiesData = getCookies(cookies);
+        if (!cookiesData.length) {
+            throw new Error('Invalid cookies');
+        }
+
         await page.goto(
             'https://id.zalo.me/account?continue=https://chat.zalo.me/',
             {
@@ -9,7 +14,7 @@ module.exports = {
             },
         );
 
-        await page.setCookie(...cookies);
+        await page.setCookie(...cookiesData);
         await page.reload();
 
         //choose manual login option
@@ -20,6 +25,8 @@ module.exports = {
             throw new Error('Not found login option');
         }
         await chooseManual.click();
+
+        await page.waitForTimeout(200);
 
         //input password
         await page.type(
@@ -36,4 +43,13 @@ module.exports = {
         }
         await loginBtn.click();
     },
+};
+
+const getCookies = (cookieString) => {
+    let cookies = [];
+    if (cookieString) {
+        cookieString = cookieString.split('|')[0];
+        cookies = JSON.parse(cookieString);
+    }
+    return cookies;
 };

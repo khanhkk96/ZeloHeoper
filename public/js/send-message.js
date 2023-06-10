@@ -30,6 +30,8 @@ $(function () {
                 success: function (data) {
                     if (data.statusCode == 200) {
                         $('form#send-form input').val('');
+                        $('form#send-form textarea').val('');
+                        alert(data.message);
                     } else {
                         alert(data.message);
                     }

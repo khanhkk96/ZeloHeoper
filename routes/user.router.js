@@ -23,14 +23,18 @@ router.post('/register', asyncMiddleware(userController.register));
 @desc    change the password for an account
 @access  Public
 */
-router.post('/change-password', asyncMiddleware(userController.changePassword));
+router.post(
+    '/change-password',
+    authenticate,
+    asyncMiddleware(userController.changePassword),
+);
 
 /*
 @route   PATCH /user/block
 @desc    block your account
 @access  Public
 */
-router.patch('/block', asyncMiddleware(userController.block));
+router.patch('/block', authenticate, asyncMiddleware(userController.block));
 
 /*
 @route   GET /user/block
@@ -51,6 +55,6 @@ router.get('/home', authenticate, asyncMiddleware(userController.home));
 @desc    logout your account
 @access  Public
 */
-router.get('/logout', asyncMiddleware(userController.logout));
+router.get('/logout', authenticate, asyncMiddleware(userController.logout));
 
 module.exports = router;

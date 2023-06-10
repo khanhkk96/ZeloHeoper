@@ -14,7 +14,7 @@ router.post(
     '/invite',
     authenticate,
     uploadOnlyTxt,
-    asyncMiddleware(friendController.inviteAddmingFriend),
+    asyncMiddleware(friendController.inviteAddingFriend),
 );
 
 module.exports = router;

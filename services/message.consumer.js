@@ -8,6 +8,10 @@ const {
 } = require('../common/constants');
 const History = require('../models/history.collection');
 const { loginAccount } = require('../utils/helper.utils');
+const fs = require('fs');
+const path = require('path');
+const { default: puppeteer } = require('puppeteer');
+const REGEX = require('../utils/regex.utils');
 
 const runJob = async function () {
     try {
@@ -24,7 +28,7 @@ const runJob = async function () {
 
         // run job every 5 minutes
         const cronJob = new CronJob({
-            cronTime: '*/3 * * * *',
+            cronTime: '*/1 * * * *',
             // eslint-disable-next-line consistent-return
             onTick: async () => {
                 console.log('Start scan a schedule to run....');
@@ -43,66 +47,87 @@ const runJob = async function () {
                     }
 
                     if (schedule.file) {
-                        const data = fs.readFileSync(schedule.file.path, {
-                            encoding: 'utf8',
-                        });
+                        const data = fs.readFileSync(
+                            path.resolve(__dirname, '..', schedule.file),
+                            {
+                                encoding: 'utf8',
+                            },
+                        );
                         phoneList = data.split('\r\n');
                     }
 
-                    const handleList = phoneList.splice(
-                        schedule.sentTo - 1,
-                        schedule.partVolume,
+                    console.log(phoneList);
+                    console.log(schedule.sentTo);
+                    console.log(schedule.partVolume);
+                    const handleList = phoneList.slice(
+                        schedule.sentTo,
+                        schedule.sentTo + schedule.partVolume,
                     );
 
                     let browser;
+                    let page;
                     try {
                         browser = await puppeteer.launch({
-                            headless: false,
-                            defaultViewport: false,
-                            executablePath:
-                                'C:/Program Files/Google/Chrome/Application/chrome.exe',
+                            // headless: false,
+                            // defaultViewport: false,
+                            // executablePath:
+                            //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
                         });
 
-                        const page = (await browser.pages())[0];
-                        await loginAccount(page, schedule.account.cookies);
+                        page = (await browser.pages())[0];
+                        await loginAccount(
+                            page,
+                            schedule.account.password,
+                            schedule.account.cookies,
+                        );
+
+                        await page.waitForNavigation();
+
+                        const currentUrl = page.url();
+                        if (currentUrl == 'https://chat.zalo.me/') {
+                            console.log('logged in...');
+                        }
                     } catch (ex) {
                         console.log('Error login account: ', ex);
-                        return new AppRequestReturn(
-                            400,
+                        // return new AppRequestReturn(
+                        //     400,
+                        //     'Không thể đăng nhập vào tài khoản đã đăng ký.',
+                        // );
+                        console.log(
                             'Không thể đăng nhập vào tài khoản đã đăng ký.',
                         );
+                        await browser.close();
+                        process.exit();
                     }
 
                     const histories = [];
                     const user = schedule.user;
                     const account = schedule.account;
+                    console.log('phone list: ', handleList);
                     for (let phone of handleList) {
-                        const sendingHistory = {
-                            user: user.id,
-                            account: account.id,
+                        const sendingHistory = new History({
+                            user: user._id,
+                            account: account._id,
                             actionType: ActionType.SENDING,
                             phone,
                             result: ActionResult.FAILURE,
-                        };
+                        });
                         if (!phone) {
                             continue;
                         }
 
+                        console.log('phone: ', phone);
                         phone = phone.replace(/\s/g, '').replace(/^\+/, '');
-                        if (!PHONE_REGEX.test(phone)) {
+                        console.log('phone 2: ', phone);
+                        const validPhone = REGEX.PHONE.test(phone);
+                        console.log('validation: ', validPhone);
+                        if (!validPhone) {
                             sendingHistory.note = `Số điện thoại [${phone}] không hợp lệ.`;
-                            histories.push(invitationHistory);
+                            histories.push(sendingHistory);
                             continue;
                         }
 
                         try {
-                            await page.waitForNavigation();
-
-                            const currentUrl = page.url();
-                            if (currentUrl == 'https://chat.zalo.me/') {
-                                console.log('logged in...');
-                            }
-
                             //enable input phone
                             const enableInputPhone = await page.waitForSelector(
                                 '#contact-search-input',
@@ -126,8 +151,8 @@ const runJob = async function () {
                                 //         'Không tìm thấy tài khoản nhận tin nhắn',
                                 //     code: 400,
                                 // });
-                                invitationHistory.note = `Không tìm thấy tài khoản [${phone}] nhận tin nhắn.`;
-                                histories.push(invitationHistory);
+                                sendingHistory.note = `Không tìm thấy tài khoản [${phone}] nhận tin nhắn.`;
+                                histories.push(sendingHistory);
                                 continue;
                             }
                             await chooseFriend.click();
@@ -138,7 +163,7 @@ const runJob = async function () {
                             });
 
                             //input message
-                            await page.type('#richInput', message);
+                            await page.type('#richInput', schedule.message);
 
                             //send message
                             const sendMessageBtn = await page.waitForSelector(
@@ -146,23 +171,32 @@ const runJob = async function () {
                             );
                             await sendMessageBtn.click();
 
-                            invitationHistory.result = ActionResult.SUCCESS;
-                            histories.push(invitationHistory);
+                            sendingHistory.result = ActionResult.SUCCESS;
+                            histories.push(sendingHistory);
+                            await page.waitForTimeout(500);
                         } catch (ex) {
                             console.log(
                                 `Error sending ${user.name}[${user.phone}] -> ${phone}: `,
                                 ex,
                             );
-                            invitationHistory.note =
+                            sendingHistory.note =
                                 'Gửi tin nhắn không thành công.';
-                            invitationHistory.note =
-                                histories.push(invitationHistory);
+                            histories.push(sendingHistory);
                         }
                     }
 
                     await History.bulkSave(histories);
                     //close browser
                     await browser.close();
+
+                    schedule.sentTo += handleList.length;
+                    console.log('have sent: ', schedule.sentTo);
+                    console.log('phoneList: ', phoneList.length);
+                    if (schedule.sentTo == phoneList.length) {
+                        schedule.status = ScheduleStatus.SENT;
+                    }
+                    await schedule.save();
+                    console.log('***End schedule ', schedule._id);
                 }
             },
         });

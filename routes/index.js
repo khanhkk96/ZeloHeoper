@@ -11,9 +11,9 @@ const initRouter = (app) => {
 
     app.use('/zaccount', authenticate, zaccountRouter);
 
-    app.use('/friend', authenticate, friendRouter);
+    app.use('/friend', friendRouter);
 
-    app.use('/schedule', authenticate, scheduleRouter);
+    app.use('/schedule', scheduleRouter);
 
     app.get('/', function (req, res) {
         res.render('auth/login');

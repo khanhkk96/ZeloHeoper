@@ -3,6 +3,8 @@ const fs = require('fs');
 const { loginAccount } = require('../utils/helper.utils');
 const { ActionType, ActionResult } = require('../common/constants');
 const History = require('../models/history.collection');
+const { default: puppeteer } = require('puppeteer');
+const REGEX = require('../utils/regex.utils');
 
 module.exports = {
     addFriend: async (file, { phone }, user, account) => {
@@ -40,16 +42,24 @@ module.exports = {
         }
 
         let browser;
+        let page;
         try {
             browser = await puppeteer.launch({
-                // headless: false,
-                // defaultViewport: false,
-                // executablePath:
-                //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
+                headless: false,
+                defaultViewport: false,
+                executablePath:
+                    'C:/Program Files/Google/Chrome/Application/chrome.exe',
             });
 
-            const page = (await browser.pages())[0];
+            page = (await browser.pages())[0];
             await loginAccount(page, account.password, account.cookies);
+
+            await page.waitForNavigation();
+
+            const currentUrl = page.url();
+            if (currentUrl == 'https://chat.zalo.me/') {
+                console.log('logged in...');
+            }
         } catch (ex) {
             console.log('Error login account: ', ex);
             return new AppRequestReturn(
@@ -60,32 +70,29 @@ module.exports = {
 
         const histories = [];
         for (let phoneNo of phoneList) {
-            const invitationHistory = {
+            await page.reload();
+            const invitationHistory = new History({
                 user: user.userId,
-                account: account.id,
+                account: account._id,
                 actionType: ActionType.INVITATION,
-                phone,
+                phoneNo,
                 result: ActionResult.FAILURE,
-            };
+            });
             if (!phoneNo) {
                 continue;
             }
 
+            console.log('Input phone', phoneNo);
             phoneNo = phoneNo.replace(/\s/g, '').replace(/^\+/, '');
-            if (!PHONE_REGEX.test(phoneNo)) {
+            console.log('Search phone', phoneNo);
+            const validPhone = REGEX.PHONE.test(phoneNo);
+            if (!validPhone) {
                 invitationHistory.note = `Số điện thoại [${phoneNo}] không hợp lệ.`;
                 histories.push(invitationHistory);
                 continue;
             }
 
             try {
-                await page.waitForNavigation();
-
-                const currentUrl = page.url();
-                if (currentUrl == 'https://chat.zalo.me/') {
-                    console.log('logged in...');
-                }
-
                 //open search friend popup
                 const openAddFrModal = await page.waitForSelector(
                     'div[data-id="btn_Main_AddFrd"]',
@@ -142,6 +149,7 @@ module.exports = {
 
                 invitationHistory.result = ActionResult.SUCCESS;
                 histories.push(invitationHistory);
+                await page.waitForTimeout(500);
             } catch (ex) {
                 console.log(
                     `Error invitation ${user.name}[${user.phone}] -> ${phoneNo}: `,
@@ -149,12 +157,13 @@ module.exports = {
                 );
                 invitationHistory.note =
                     'Gửi lời mời kết bạn không thành công.';
-                invitationHistory.note = histories.push(invitationHistory);
+                histories.push(invitationHistory);
             }
         }
         await History.bulkSave(histories);
         //close browser
         await browser.close();
+        console.log('***Ending invite friends');
 
         return new AppRequestReturn(
             200,

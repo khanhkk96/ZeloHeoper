@@ -1,3 +1,4 @@
+const AppRequestReturn = require('../common/app-request-return');
 const Schedule = require('../models/schedule.collection');
 const fs = require('fs');
 
@@ -19,28 +20,39 @@ module.exports = {
             );
         }
 
-        let phoneList = [];
+        //let phoneList = [];
+        let phones = 0;
         if (phone) {
-            phoneList.push(phone);
+            //phoneList.push(phone);
+            phones = 1;
         }
 
         if (file) {
             const data = fs.readFileSync(file.path, { encoding: 'utf8' });
-            phoneList = data.split('\r\n');
+            //phoneList = data.split('\r\n');
+            phones = data.split('\r\n').length;
         }
 
-        if (!phoneList.length) {
+        if (!phones) {
             return new AppRequestReturn(422, 'Nhập danh sách số điện thoại.');
         }
 
-        if (sendTime && !(sendTime instanceof Date)) {
-            return new AppRequestReturn(422, 'Thời gian cài đặt không hợp lệ.');
+        let sentTimeAt = undefined;
+        if (sendTime) {
+            const sendTimevalue = new Date(sendTime);
+            if (!(sendTimevalue instanceof Date)) {
+                return new AppRequestReturn(
+                    422,
+                    'Thời gian cài đặt không hợp lệ.',
+                );
+            }
+            sentTimeAt = sendTimevalue;
         }
 
         await Schedule.create({
             user: user.userId,
-            account: account.id,
-            time: sendTime ?? new Date(),
+            account: account._id,
+            time: sentTimeAt ?? new Date(),
             message,
             file: file.path,
             phoneNumber: phone,
@@ -64,17 +76,20 @@ module.exports = {
             );
         }
 
-        let phoneList = [];
+        // let phoneList = [];
+        let phones = 0;
         if (phone) {
-            phoneList.push(phone);
+            //phoneList.push(phone);
+            phones = 1;
         }
 
         if (file) {
             const data = fs.readFileSync(file.path, { encoding: 'utf8' });
-            phoneList = data.split('\r\n');
+            //phoneList = data.split('\r\n');
+            phones = data.split('\r\n').length;
         }
 
-        if (!phoneList.length) {
+        if (!phones) {
             return new AppRequestReturn(422, 'Nhập danh sách số điện thoại.');
         }
 
@@ -90,6 +105,7 @@ module.exports = {
         schedule.message = message;
         schedule.time = sendTime;
         schedule.phoneNumber = phone;
+        schedule.account = account._id;
         if (file) {
             schedule.file = file.path;
         }

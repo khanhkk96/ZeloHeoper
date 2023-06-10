@@ -28,6 +28,7 @@ $(function () {
                 success: function (data) {
                     if (data.statusCode == 200) {
                         $('form#invite-form input').val('');
+                        alert(data.message);
                     } else {
                         alert(data.message);
                     }

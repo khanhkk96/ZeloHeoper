@@ -9,7 +9,8 @@ module.exports = {
             return new AppRequestReturn(422, 'Vui lòng nhập đầy đủ thông tin.');
         }
 
-        if (!REGEX.PHONE.test(phone)) {
+        const validPhone = REGEX.PHONE.test(phone);
+        if (!validPhone) {
             return new AppRequestReturn(422, 'Số điện thoại không hợp lệ.');
         }
 
@@ -41,7 +42,8 @@ module.exports = {
             return new AppRequestReturn(422, 'Vui lòng nhập đầy đủ thông tin.');
         }
 
-        if (!REGEX.PHONE.test(phone)) {
+        const validPhone = REGEX.PHONE.test(phone);
+        if (!validPhone) {
             return new AppRequestReturn(422, 'Số điện thoại không hợp lệ.');
         }
 
