@@ -1,3 +1,4 @@
+const path = require('path');
 const AppRequestReturn = require('../common/app-request-return');
 const Schedule = require('../models/schedule.collection');
 const fs = require('fs');
@@ -93,8 +94,16 @@ module.exports = {
             return new AppRequestReturn(422, 'Nhập danh sách số điện thoại.');
         }
 
-        if (sendTime && !(sendTime instanceof Date)) {
-            return new AppRequestReturn(422, 'Thời gian cài đặt không hợp lệ.');
+        let sentTimeAt = undefined;
+        if (sendTime) {
+            const sendTimevalue = new Date(sendTime);
+            if (!(sendTimevalue instanceof Date)) {
+                return new AppRequestReturn(
+                    422,
+                    'Thời gian cài đặt không hợp lệ.',
+                );
+            }
+            sentTimeAt = sendTimevalue;
         }
 
         const schedule = await Schedule.findById(id);
@@ -103,14 +112,20 @@ module.exports = {
         }
 
         schedule.message = message;
-        schedule.time = sendTime;
+        schedule.time = sentTimeAt ?? new Date();
         schedule.phoneNumber = phone;
         schedule.account = account._id;
+        let oldFile = '';
         if (file) {
             schedule.file = file.path;
+            oldFile = schedule.file;
         }
 
         await schedule.save();
+
+        if (oldFile) {
+            fs.unlinkSync(path.resolve(path.dirname, '..', oldFile));
+        }
 
         return new AppRequestReturn(
             200,
@@ -133,6 +148,10 @@ module.exports = {
             }
 
             await Schedule.softDelete(mongoose.Types.ObjectId(id));
+
+            if (schedule.file) {
+                fs.unlinkSync(path.resolve(path.dirname, '..', schedule.file));
+            }
         } catch (ex) {
             console.log(ex);
             return new AppRequestReturn(
@@ -142,5 +161,23 @@ module.exports = {
         }
 
         return new AppRequestReturn(200, 'Xóa lịch cài đặt thành công.');
+    },
+
+    list: async ({ page, size }, { userId }) => {
+        const condition = { user: userId };
+        // if (key) {
+        //     condition['phone'] = { $regex: new RegExp(key, 'i') };
+        // }
+
+        const schedules = await Schedule.find(condition)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * size)
+            .limit(size);
+
+        return new AppRequestReturn(
+            200,
+            'Lấy danh sách tài khoản thành công.',
+            schedules,
+        );
     },
 };

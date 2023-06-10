@@ -17,4 +17,18 @@ router.post(
     asyncMiddleware(scheduleController.createSchedule),
 );
 
+/*
+@route   GET /schedule/list
+@desc    logout your account
+@access  Public
+*/
+router.get('/list', authenticate, asyncMiddleware(scheduleController.list));
+
+/*
+@route   DELETE /schedule/delete/:id
+@desc    change the password for an account
+@access  Public
+*/
+router.delete('/delete/:id', asyncMiddleware(scheduleController.delete));
+
 module.exports = router;

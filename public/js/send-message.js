@@ -1,3 +1,5 @@
+const ms_baseUrl = '/schedule/';
+
 $(function () {
     $('#MessageBox .text-option').on('change', function () {
         $('#MessageBox .form-item.text').show();
@@ -23,7 +25,7 @@ $(function () {
 
             $.ajax({
                 type: 'post',
-                url: '/schedule/create',
+                url: ms_baseUrl + 'create',
                 data: formData,
                 processData: false,
                 contentType: false,
@@ -43,4 +45,59 @@ $(function () {
                 },
             });
         });
+
+    loadSchedule();
 });
+
+const loadSchedule = function () {
+    showLoading();
+    $.get(ms_baseUrl + 'list', function (res) {
+        $('#schedule-table').html('');
+        $.each(res.data, function (index, item) {
+            $('#schedule-table').append(`
+            <tr>
+                <td>${index + 1}</td>
+                <td>${item.message}</td>
+                <td>
+                    <div>
+                        <span>${item.status ? 'Chờ gửi' : 'Đã gửi'} </span>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <button class="row-btn delete" onclick="viewConfirmDeleteSchedule('${
+                            item._id
+                        }')">Xóa</button>
+                    </div>
+                </td>
+            </tr>
+            `);
+        });
+        closeLoading();
+    });
+};
+
+const viewConfirmDeleteSchedule = function (id) {
+    showModal('#confirm-delete-schedule');
+
+    $('#confirm-delete-schedule .submit')
+        .unbind('click')
+        .on('click', function () {
+            $.ajax({
+                url: ms_baseUrl + `delete/${id}`,
+                type: 'DELETE',
+                success: function (res) {
+                    if (res.statusCode === 200) {
+                        closeModal('#confirm-delete-schedule');
+                        loadSchedule();
+                    } else {
+                        alert(res.message ?? 'Lỗi hệ thống.');
+                    }
+                    closeLoading();
+                },
+            }).fail(function () {
+                alert('Lỗi hệ thống.');
+                closeLoading();
+            });
+        });
+};

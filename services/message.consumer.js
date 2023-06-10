@@ -68,10 +68,10 @@ const runJob = async function () {
                     let page;
                     try {
                         browser = await puppeteer.launch({
-                            // headless: false,
-                            // defaultViewport: false,
-                            // executablePath:
-                            //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
+                            headless: false,
+                            defaultViewport: false,
+                            executablePath:
+                                'C:/Program Files/Google/Chrome/Application/chrome.exe',
                         });
 
                         page = (await browser.pages())[0];

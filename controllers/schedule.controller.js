@@ -14,4 +14,12 @@ module.exports = {
         }
         res.json(result);
     },
+    //list of accounts
+    list: async (req, res) => {
+        res.json(await scheduleService.list(req.query, req.user));
+    },
+    //delete an account
+    delete: async (req, res) => {
+        res.json(await scheduleService.delete(req.params));
+    },
 };

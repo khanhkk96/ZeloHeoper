@@ -1,4 +1,4 @@
-const baseUrl = '/zaccount/';
+const acc_baseUrl = '/zaccount/';
 
 $(function () {
     loadTableData();
@@ -34,7 +34,7 @@ const cleanModal = function (modal = '#add-account') {
 
 const loadTableData = function () {
     showLoading();
-    $.get(baseUrl + 'list', function (res) {
+    $.get(acc_baseUrl + 'list', function (res) {
         $('#zaccount-table').html('');
         $.each(res.data, function (index, item) {
             $('#zaccount-table').append(`
@@ -80,7 +80,7 @@ const createNewZAccount = function () {
     }
 
     $.post(
-        baseUrl + 'create',
+        acc_baseUrl + 'create',
         {
             phone,
             password: psw,
@@ -116,7 +116,7 @@ const updateZAccount = function (id) {
     }
 
     $.ajax({
-        url: baseUrl + `update/${id}`,
+        url: acc_baseUrl + `update/${id}`,
         type: 'PUT',
         data: {
             phone,
@@ -142,7 +142,7 @@ const updateZAccount = function (id) {
 const viewAccount = function (id) {
     showLoading();
     cleanModal();
-    $.get(baseUrl + id, function (res) {
+    $.get(acc_baseUrl + id, function (res) {
         if (res.statusCode == 200) {
             $('#add-account .phone').val(res.data.phone);
             $('#add-account #hidden-za').val(res.data._id);
@@ -159,7 +159,7 @@ const viewConfirmDelete = function (id) {
         .unbind('click')
         .on('click', function () {
             $.ajax({
-                url: baseUrl + `delete/${id}`,
+                url: acc_baseUrl + `delete/${id}`,
                 type: 'DELETE',
                 success: function (res) {
                     if (res.statusCode === 200) {
@@ -179,7 +179,7 @@ const viewConfirmDelete = function (id) {
 
 const pickAccount = function (id) {
     $.ajax({
-        url: baseUrl + `pick/${id}`,
+        url: acc_baseUrl + `pick/${id}`,
         type: 'PATCH',
         success: function (res) {
             if (res.statusCode === 200) {

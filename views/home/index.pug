@@ -87,32 +87,51 @@ html(lang="en")
 
             div(id="MessageBox", class="tabcontent")
                 h3 Cài đặt lịch nhắn tin
-                div
-                    form(method="POST", id="send-form", action="/start", enctype="multipart/form-data", style="max-width: 250px")
-                        div 
-                            input(type="radio", value="file", name="type", class="radio-btn file-option", id="mb_file")
-                            label(for="mb_file") File
-                            input(type="radio", value="text", name="type", class="radio-btn text-option", id="mb_text", checked)
-                            label(for="mb_text") Text
+                div(style="display: flex; flex-direction: row;")
+                    div
+                        form(method="POST", id="send-form", action="/start", enctype="multipart/form-data", style="min-width: 240px")
+                            div 
+                                input(type="radio", value="file", name="type", class="radio-btn file-option", id="mb_file")
+                                label(for="mb_file") File
+                                input(type="radio", value="text", name="type", class="radio-btn text-option", id="mb_text", checked)
+                                label(for="mb_text") Text
 
-                        div(class="form-item text")
-                            p(style="margin-bottom: 5px;") Số điện thoại 
-                            input(type="text", name="phone", class="phone-number")
+                            div(class="form-item text")
+                                p(style="margin-bottom: 5px;") Số điện thoại 
+                                input(type="text", name="phone", class="phone-number")
 
-                        div(class="form-item file hide")
-                            p(style="margin-bottom: 5px;") Danh sách số điện thoại 
-                            input(type="file", name="file", accept=".txt", class="phone-file")
+                            div(class="form-item file hide")
+                                p(style="margin-bottom: 5px;") Danh sách số điện thoại 
+                                input(type="file", name="file", accept=".txt", class="phone-file")
 
-                        div(class="form-item")
-                            p(style="margin-bottom: 5px;") Tin nhắn
-                            textarea(name="message", id="message", class="message", rows="4")
+                            div(class="form-item")
+                                p(style="margin-bottom: 5px;") Tin nhắn
+                                textarea(name="message", id="message", class="message", rows="4")
 
-                        div(class="form-item")
-                            p(style="margin-bottom: 5px;") Thời gian 
-                            input(type="datetime-local", name="time", class="send-time")
+                            div(class="form-item")
+                                p(style="margin-bottom: 5px;") Thời gian 
+                                input(type="datetime-local", name="time", class="send-time")
 
-                    div(style="margin-top: 20px; margin-left: 0%; display:flex")
-                        button(type="button", id='send-ms', class="btn send-ms") Gửi tin nhắn
+                        div(style="margin-top: 20px; margin-left: 0%; display:flex")
+                            button(type="button", id='send-ms', class="btn send-ms") Gửi tin nhắn
+
+                    div(style="width: 100%; margin-left: 25px;")
+                        table
+                            tr 
+                                th(width=10) STT
+                                th Tin nhắn 
+                                th(width=100) Tình trạng
+                                th(width=30) Ngày tạo
+                            tbody(id='schedule-table')
+                                tr
+                                    td 1
+                                    td hello
+                                    td 
+                                        div
+                                            span Chờ gửi
+                                    td 
+                                        div
+                                            button(class="row-btn delete") Xóa
 
         div(class="modal hide", id="add-account")
             div(class="modal-content")
@@ -155,6 +174,21 @@ html(lang="en")
                     div(class="form-item")
                         div
                             h4(style="margin-bottom: 25px;") Bạn chắc chắn muốn xóa tài khoản này???
+
+                    div(style="float: right;")
+                        button(class="btn cancel") Hủy
+                        button(class="btn submit") Đồng ý
+
+        div(class="modal hide", id="confirm-delete-schedule")
+            div(class="modal-content")
+                <span class="close">&times;</span>
+                div(class="header")
+                    h2(style="color: red;") Xóa
+
+                div(class="modal-body")
+                    div(class="form-item")
+                        div
+                            h4(style="margin-bottom: 25px;") Bạn chắc chắn muốn xóa lịch cài đặt này???
 
                     div(style="float: right;")
                         button(class="btn cancel") Hủy
