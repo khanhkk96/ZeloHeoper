@@ -54,7 +54,7 @@ module.exports = {
             account: account._id,
             time: sentTimeAt ?? new Date(),
             message,
-            file: file.path,
+            file: file?.path,
             phoneNumber: phone,
         });
 

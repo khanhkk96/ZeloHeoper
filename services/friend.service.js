@@ -45,10 +45,10 @@ module.exports = {
         let page;
         try {
             browser = await puppeteer.launch({
-                headless: false,
-                defaultViewport: false,
-                executablePath:
-                    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+                // headless: false,
+                // defaultViewport: false,
+                // executablePath:
+                //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
             });
 
             page = (await browser.pages())[0];
@@ -75,7 +75,7 @@ module.exports = {
                 user: user.userId,
                 account: account._id,
                 actionType: ActionType.INVITATION,
-                phoneNo,
+                phone: phoneNo,
                 result: ActionResult.FAILURE,
             });
             if (!phoneNo) {

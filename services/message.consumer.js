@@ -42,8 +42,8 @@ const runJob = async function () {
                 console.log('Schedule info: ', schedule);
                 if (schedule) {
                     let phoneList = [];
-                    if (schedule.phone) {
-                        phoneList.push(schedule.phone);
+                    if (schedule.phoneNumber) {
+                        phoneList.push(schedule.phoneNumber);
                     }
 
                     if (schedule.file) {
