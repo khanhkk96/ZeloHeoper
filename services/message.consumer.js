@@ -5,15 +5,19 @@ const {
     ScheduleStatus,
     ActionType,
     ActionResult,
+    Enviroment,
 } = require('../common/constants');
 const History = require('../models/history.collection');
-const { loginAccount } = require('../utils/helper.utils');
+const ZAccount = require('../models/zl_account.collection');
+const { loginAccount, getLinuxChromePath } = require('../utils/helper.utils');
 const fs = require('fs');
 const path = require('path');
 const { default: puppeteer } = require('puppeteer');
 const REGEX = require('../utils/regex.utils');
+const jwt = require('jsonwebtoken');
 
 const runJob = async function () {
+    let browser;
     try {
         const mongodb = await mongoose.connect(process.env.DB_URI, {
             useNewUrlParser: true,
@@ -28,19 +32,53 @@ const runJob = async function () {
 
         // run job every 5 minutes
         const cronJob = new CronJob({
-            cronTime: '*/1 * * * *',
+            cronTime: '*/3 * * * *',
             // eslint-disable-next-line consistent-return
             onTick: async () => {
                 console.log('Start scan a schedule to run....');
-                const schedule = await Schedule.findOne({
+                console.log('Start job: ', new Date());
+                const schedules = await Schedule.find({
                     time: { $lte: new Date() },
                     status: ScheduleStatus.PENDING,
                 })
                     .populate('user')
-                    .populate('account');
+                    .populate('account')
+                    .sort({ sentTo: 1 })
+                    .limit(3);
 
-                console.log('Schedule info: ', schedule);
-                if (schedule) {
+                const config = {
+                    // headless: false,
+                    // defaultViewport: false,
+                    // executablePath:
+                    //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
+                };
+                if (process.env.NODE_ENV === Enviroment.TEST) {
+                    console.log('server is launching chromium-browser');
+                    config.executablePath = await getLinuxChromePath();
+                    config.headless = true;
+                    config.args = ['--no-sandbox'];
+                }
+                browser = await puppeteer.launch(config);
+
+                for (const schedule of schedules) {
+                    console.log('Start send by a schedule: ', new Date());
+                    console.log('Schedule info: ', schedule);
+                    if (schedule.account.isUsing) {
+                        console.log(
+                            'Tài khoản thực hiện thao tác đang được sử dụng.',
+                        );
+                        continue;
+                    }
+                    const zaccount = await ZAccount.findOne(
+                        schedule.account._id,
+                    );
+                    //lock zaccount
+                    zaccount.isUsing = true;
+                    await zaccount.save();
+                    //lock schedule
+                    schedule.isProcessing = true;
+                    await schedule.save();
+
                     let phoneList = [];
                     if (schedule.phoneNumber) {
                         phoneList.push(schedule.phoneNumber);
@@ -56,28 +94,34 @@ const runJob = async function () {
                         phoneList = data.split('\r\n');
                     }
 
-                    console.log(phoneList);
-                    console.log(schedule.sentTo);
-                    console.log(schedule.partVolume);
+                    if (!phoneList.length) {
+                        console.log('Danh sách số điện thoại trống.');
+                        //open zaccount
+                        zaccount.isUsing = false;
+                        await zaccount.save();
+                        //open schedule
+                        schedule.isProcessing = false;
+                        await schedule.save();
+
+                        continue;
+                    }
+
                     const handleList = phoneList.slice(
                         schedule.sentTo,
                         schedule.sentTo + schedule.partVolume,
                     );
+                    console.log(handleList);
 
-                    let browser;
                     let page;
                     try {
-                        browser = await puppeteer.launch({
-                            headless: false,
-                            defaultViewport: false,
-                            executablePath:
-                                'C:/Program Files/Google/Chrome/Application/chrome.exe',
-                        });
-
-                        page = (await browser.pages())[0];
+                        page = await browser.newPage();
+                        const jwtData = jwt.verify(
+                            schedule.account.password,
+                            process.env.SECRET_OR_KEY,
+                        );
                         await loginAccount(
                             page,
-                            schedule.account.password,
+                            jwtData,
                             schedule.account.cookies,
                         );
 
@@ -89,15 +133,18 @@ const runJob = async function () {
                         }
                     } catch (ex) {
                         console.log('Error login account: ', ex);
-                        // return new AppRequestReturn(
-                        //     400,
-                        //     'Không thể đăng nhập vào tài khoản đã đăng ký.',
-                        // );
                         console.log(
                             'Không thể đăng nhập vào tài khoản đã đăng ký.',
                         );
-                        await browser.close();
-                        process.exit();
+                        //open zaccount
+                        zaccount.isUsing = false;
+                        await zaccount.save();
+                        //open schedule
+                        schedule.isProcessing = false;
+                        await schedule.save();
+
+                        await page.close();
+                        continue;
                     }
 
                     const histories = [];
@@ -110,6 +157,7 @@ const runJob = async function () {
                             account: account._id,
                             actionType: ActionType.SENDING,
                             phone,
+                            message: schedule.message,
                             result: ActionResult.FAILURE,
                         });
                         if (!phone) {
@@ -128,6 +176,9 @@ const runJob = async function () {
                         }
 
                         try {
+                            await page.reload({
+                                waitUntil: 'domcontentloaded',
+                            });
                             //enable input phone
                             const enableInputPhone = await page.waitForSelector(
                                 '#contact-search-input',
@@ -141,16 +192,16 @@ const runJob = async function () {
 
                             await page.waitForTimeout(1000);
 
+                            // await page.waitForSelector(
+                            //     '#searchResultList #searchResultList .ReactVirtualized__Grid__innerScrollContainer',
+                            //     { visible: true, timeout: 1000 },
+                            // );
+
                             //choose a friend to send message
                             const chooseFriend = await page.$(
                                 '#searchResultList #searchResultList .ReactVirtualized__Grid__innerScrollContainer div:nth-child(2) .conv-item__avatar',
                             );
                             if (!chooseFriend) {
-                                // return res.json({
-                                //     message:
-                                //         'Không tìm thấy tài khoản nhận tin nhắn',
-                                //     code: 400,
-                                // });
                                 sendingHistory.note = `Không tìm thấy tài khoản [${phone}] nhận tin nhắn.`;
                                 histories.push(sendingHistory);
                                 continue;
@@ -159,7 +210,8 @@ const runJob = async function () {
 
                             //waiting page load done
                             await page.waitForSelector('#richInput', {
-                                timeout: 2000,
+                                timeout: 3000,
+                                visible: true,
                             });
 
                             //input message
@@ -173,7 +225,6 @@ const runJob = async function () {
 
                             sendingHistory.result = ActionResult.SUCCESS;
                             histories.push(sendingHistory);
-                            await page.waitForTimeout(500);
                         } catch (ex) {
                             console.log(
                                 `Error sending ${user.name}[${user.phone}] -> ${phone}: `,
@@ -186,18 +237,26 @@ const runJob = async function () {
                     }
 
                     await History.bulkSave(histories);
-                    //close browser
-                    await browser.close();
 
                     schedule.sentTo += handleList.length;
-                    console.log('have sent: ', schedule.sentTo);
-                    console.log('phoneList: ', phoneList.length);
                     if (schedule.sentTo == phoneList.length) {
                         schedule.status = ScheduleStatus.SENT;
                     }
+                    //open schedule
+                    schedule.isProcessing = false;
                     await schedule.save();
+
+                    //open zaccount
+                    zaccount.isUsing = false;
+                    await zaccount.save();
+                    await page.close();
+
                     console.log('***End schedule ', schedule._id);
+                    console.log('Finish the schedule: ', new Date());
                 }
+
+                console.log('End job: ', new Date());
+                await browser.close();
             },
         });
 
@@ -205,6 +264,9 @@ const runJob = async function () {
         return true;
     } catch (ex) {
         console.log('Error: ', ex);
+        if (browser) {
+            await browser.close();
+        }
         process.exit();
     }
 };

@@ -2,6 +2,7 @@ const path = require('path');
 const AppRequestReturn = require('../common/app-request-return');
 const Schedule = require('../models/schedule.collection');
 const fs = require('fs');
+const { default: mongoose } = require('mongoose');
 
 module.exports = {
     createSchedule: async (
@@ -124,7 +125,10 @@ module.exports = {
         await schedule.save();
 
         if (oldFile) {
-            fs.unlinkSync(path.resolve(path.dirname, '..', oldFile));
+            const filePath = path.resolve(path.dirname, '..', oldFile);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
         }
 
         return new AppRequestReturn(
@@ -147,10 +151,24 @@ module.exports = {
                 );
             }
 
+            if (schedule.isProcessing) {
+                return new AppRequestReturn(
+                    400,
+                    'Lịch cài đặt đang được thực hiện.',
+                );
+            }
+
             await Schedule.softDelete(mongoose.Types.ObjectId(id));
 
             if (schedule.file) {
-                fs.unlinkSync(path.resolve(path.dirname, '..', schedule.file));
+                const filePath = path.resolve(
+                    path.dirname,
+                    '..',
+                    schedule.file,
+                );
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
             }
         } catch (ex) {
             console.log(ex);

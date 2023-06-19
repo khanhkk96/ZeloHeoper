@@ -43,9 +43,11 @@ const loadTableData = function () {
                 <td>${item.phone}</td>
                 <td>
                     <div>
-                        <span>${item.inUse ? 'Đang' : 'Chưa'} kích hoạt</span>
+                        <span>${
+                            item.isActive ? 'Đang' : 'Chưa'
+                        } kích hoạt</span>
                         <button class="row-btn pick-up ${
-                            item.inUse ? 'hide' : ''
+                            item.isActive ? 'hide' : ''
                         }" onclick="pickAccount('${item._id}')">Kích hoạt</button>
                     </div>
                 </td>

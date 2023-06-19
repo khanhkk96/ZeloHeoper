@@ -12,7 +12,7 @@ const ZlAccountSchema = new Schema(
         phone: {
             type: String,
             required: true,
-            unique: true,
+            // unique: true,
         },
         password: {
             type: String,
@@ -22,7 +22,11 @@ const ZlAccountSchema = new Schema(
             type: String,
             required: true,
         },
-        inUse: {
+        isActive: {
+            type: Boolean,
+            default: false,
+        },
+        isUsing: {
             type: Boolean,
             default: false,
         },

@@ -6,11 +6,8 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title zaka
         script(src="https://code.jquery.com/jquery-3.6.3.min.js") 
+        link(rel="stylesheet" href="/lib/pagination/bs-pagination.min.css")
         link(rel='stylesheet', type='text/css', href='/css/main.css')
-        script(src="/js/main.js")
-        script(src="/js/zaccount.js")
-        script(src="/js/invite-friend.js")
-        script(src="/js/send-message.js")
 
     body(style="margin: 0; height:100vh;")
 
@@ -18,8 +15,8 @@ html(lang="en")
             h1 Đang xử lý....
             
         div(class="container")
-            div(style="display: flex;")
-                h1(style="margin: 0") 4Fun
+            div(class="flex")
+                h1(style="margin: 0") Zola
                 a(href="logout") Đăng xuất
         
             div(class="tab")
@@ -33,7 +30,7 @@ html(lang="en")
                     button(class="table-btn add", id="add-item", onclick="$('#add-account').show()") Thêm mới
                     //- button(class="table-btn delete", id="delete-item") Xóa
                 
-                div
+                div(style="overflow: auto;")
                     table
                         tr
                             th STT
@@ -65,7 +62,10 @@ html(lang="en")
                                         button(class="row-btn delete") Xóa
 
             div(id="Friends", class="tabcontent")
-                h3 Friends
+                div(class="flex")
+                    h3(style="width:30%") Kết bạn
+                    a(href='javascript: void(0);' ,id="view-invitation", style="padding-top:20px;") Lịch sử
+
                 div
                     form(method="POST", id="invite-form", action="/start", enctype="multipart/form-data", style="max-width: 250px")
                         div 
@@ -86,10 +86,13 @@ html(lang="en")
                         button(type="button", id='add-frd', class="btn add-friend") Kết bạn
 
             div(id="MessageBox", class="tabcontent")
-                h3 Cài đặt lịch nhắn tin
-                div(style="display: flex; flex-direction: row;")
-                    div
-                        form(method="POST", id="send-form", action="/start", enctype="multipart/form-data", style="min-width: 240px")
+                div(class="flex")
+                    h3(style="width: 30%;") Cài đặt lịch nhắn tin
+                    a(href='javascript: void(0);' ,id="view-sent", style="padding-top:20px;") Lịch sử
+
+                div(class="content-container")
+                    div(style="min-width: 240px")
+                        form(method="POST", id="send-form", action="/start", enctype="multipart/form-data")
                             div 
                                 input(type="radio", value="file", name="type", class="radio-btn file-option", id="mb_file")
                                 label(for="mb_file") File
@@ -115,13 +118,14 @@ html(lang="en")
                         div(style="margin-top: 20px; margin-left: 0%; display:flex")
                             button(type="button", id='send-ms', class="btn send-ms") Gửi tin nhắn
 
-                    div(style="width: 100%; margin-left: 25px;")
+                    div(class="table-wrapper")
                         table
                             tr 
                                 th(width=10) STT
                                 th Tin nhắn 
                                 th(width=100) Tình trạng
                                 th(width=30) Ngày tạo
+                                th(width=30) Thao tác
                             tbody(id='schedule-table')
                                 tr
                                     td 1
@@ -129,13 +133,14 @@ html(lang="en")
                                     td 
                                         div
                                             span Chờ gửi
+                                    td 20/10/2022 10:20
                                     td 
                                         div
                                             button(class="row-btn delete") Xóa
 
         div(class="modal hide", id="add-account")
             div(class="modal-content")
-                <span class="close">&times;</span>
+                span(class="close") &times;
                 div(class="header")
                     h2 Tài khoản
 
@@ -158,6 +163,7 @@ html(lang="en")
 
                     div(class="form-item")
                         p(style="margin-bottom: 5px;") Cookies
+                        a(href="/tool/GetCookie.rar") Chrome Extension(hỗ trợ lấy cookie)
                         textarea(class="cookies", name="cookies", id="cookies", style="width: 100%", rows="6")
 
                     div(style="float: right;")
@@ -166,7 +172,7 @@ html(lang="en")
 
         div(class="modal hide", id="confirm-delete")
             div(class="modal-content")
-                <span class="close">&times;</span>
+                span(class="close") &times;
                 div(class="header")
                     h2(style="color: red;") Xóa
 
@@ -181,7 +187,7 @@ html(lang="en")
 
         div(class="modal hide", id="confirm-delete-schedule")
             div(class="modal-content")
-                <span class="close">&times;</span>
+                span(class="close") &times;
                 div(class="header")
                     h2(style="color: red;") Xóa
 
@@ -194,4 +200,103 @@ html(lang="en")
                         button(class="btn cancel") Hủy
                         button(class="btn submit") Đồng ý
 
+        div(class="modal large hide", id="invitation-history")
+            div(class="modal-content")
+                span(class="close") &times;
+                div(class="header")
+                    h2 Lịch sử kết bạn
 
+                div(class="modal-body")
+                    div(class="form-item flex search-wrapper")
+                        input(type="text", placeholder="Số điện thoại", class="search-phone")
+                        select(class="search-result")
+                            option(value='') --Trạng thái--
+                            option(value='success') Thành công
+                            option(value='failure') Thất bại
+                        button(class="btn btn-search") Tìm kiếm
+                    div(class="form-item")
+                        table
+                            tr 
+                                th(width=10) STT
+                                th(width=110) Nguời nhận
+                                th Tài khoản
+                                th Kết quả
+                                th Ghi chú
+                                th Ngày thực hiện
+                            tbody(id='invitation-hs-table')
+                                tr
+                                    td 1
+                                    td 0354908151
+                                    td 0354908152
+                                    td Thành công
+                                    td Thành công
+                                    td 10/06/2023 10:10
+
+                    div(class="page-pagination")
+                        div(class="page-left")
+                            span(class="text") Hiển thị:
+                            div(class="number")
+                                select(style="width: 100px;", name="size", id="invitation-page-size")
+                                    option(value="10", selected) 10
+                                    option(value="20") 20
+                                    option(value="30") 30
+                                    option(value="50") 50
+                        ul(id="invitation-pagination-container", class="pagination")
+
+                    div(style="float: right;")
+                        button(class="btn cancel") Đóng
+
+        div(class="modal large hide", id="sending-history")
+            div(class="modal-content")
+                span(class="close") &times;
+                div(class="header")
+                    h2 Lịch sử tin nhắn
+
+                div(class="modal-body")
+                    div(class="form-item flex search-wrapper")
+                        input(type="text", placeholder="Số điện thoại", class="search-phone")
+                        input(type="text", placeholder="Tin nhắn", class="search-message")
+                        select(class="search-result")
+                            option(value='') --Trạng thái--
+                            option(value='success') Thành công
+                            option(value='failure') Thất bại
+                        button(class="btn btn-search") Tìm kiếm
+                    div(class="form-item", style="max-height: 600px; overflow: auto;")
+                        table
+                            tr 
+                                th(width=10) STT
+                                th(width=110) Nguời nhận 
+                                th Tin nhắn
+                                th Tài khoản
+                                th Kết quả
+                                th Ghi chú
+                                th Ngày thực hiện
+                            tbody(id='sending-hs-table')
+                                tr
+                                    td 1
+                                    td 0354908151
+                                    td hello
+                                    td 0354908152
+                                    td Thành công
+                                    td Thành công
+                                    td 10/06/2023 10:10
+
+                    div(class="page-pagination")
+                        div(class="page-left")
+                            span(class="text") Hiển thị:
+                            div(class="number")
+                                select(style="width: 100px;", name="size", id="message-page-size")
+                                    option(value="10", selected) 10
+                                    option(value="20") 20
+                                    option(value="30") 30
+                                    option(value="50") 50
+                        ul(id="message-pagination-container", class="pagination")
+
+                    div(style="float: right;")
+                        button(class="btn cancel") Đóng
+
+    script(src="/lib/pagination/pagination.min.js")
+    script(src="/js/main.js")
+    script(src="/js/zaccount.js")
+    script(src="/js/invite-friend.js")
+    script(src="/js/send-message.js")

@@ -4,6 +4,7 @@ const userRouter = require('./user.router');
 const zaccountRouter = require('./zlAccount.router');
 const friendRouter = require('./friend.router');
 const scheduleRouter = require('./schedule.router');
+const historyRouter = require('./history.router');
 const { authenticate } = require('../common/authentication');
 
 const initRouter = (app) => {
@@ -11,12 +12,14 @@ const initRouter = (app) => {
 
     app.use('/zaccount', authenticate, zaccountRouter);
 
-    app.use('/friend', friendRouter);
+    app.use('/friend', authenticate, friendRouter);
 
-    app.use('/schedule', scheduleRouter);
+    app.use('/schedule', authenticate, scheduleRouter);
+
+    app.use('/history', authenticate, historyRouter);
 
     app.get('/', function (req, res) {
-        res.render('auth/login');
+        res.redirect('/user/home');
     });
 
     app.all('*', (req, res) => {

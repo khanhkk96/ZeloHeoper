@@ -1,3 +1,6 @@
+const path = require('path');
+const { glob } = require('glob');
+
 module.exports = {
     loginAccount: async (page, password, cookies) => {
         const cookiesData = getCookies(cookies);
@@ -26,7 +29,11 @@ module.exports = {
         }
         await chooseManual.click();
 
-        await page.waitForTimeout(200);
+        //await page.waitForTimeout(200);
+        await page.waitForSelector(
+            '.form-signin .line-form input[type="password"]',
+            { visible: true },
+        );
 
         //input password
         await page.type(
@@ -42,6 +49,19 @@ module.exports = {
             throw new Error('Cannot login into your account');
         }
         await loginBtn.click();
+    },
+
+    getLinuxChromePath: async () => {
+        const url = path.resolve(
+            __dirname,
+            path.join('../node_modules/puppeteer/.local-chromium'),
+        );
+        console.log(url);
+        const chromeFiles = await glob('**/chrome-linux/chrome', {
+            cwd: url,
+        });
+        console.log(chromeFiles);
+        return path.join(url, chromeFiles[0]);
     },
 };
 

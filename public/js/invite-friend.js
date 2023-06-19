@@ -40,4 +40,116 @@ $(function () {
                 },
             });
         });
+
+    $('#view-invitation')
+        .unbind('click')
+        .on('click', function () {
+            $('#invitation-history').show();
+            loadInvitationHistory();
+        });
+
+    $('#invitation-history .search-wrapper .btn-search')
+        .unbind('click')
+        .on('click', function () {
+            console.log('searching...');
+            const phone = $(
+                '#invitation-history .search-wrapper .search-phone',
+            ).val();
+            const status = $(
+                '#invitation-history .search-wrapper .search-result',
+            ).val();
+            loadInvitationHistory(phone, status);
+        });
+
+    $('#invitation-page-size').on('change', function () {
+        $('#invitation-history .search-wrapper .btn-search').trigger('click');
+    });
 });
+
+// const loadInvitationHistory2 = function () {
+//     showLoading();
+//     $.post(
+//         '/history/list',
+//         {
+//             action: 'invitation',
+//             search: '',
+//             from: null,
+//             to: null,
+//             account: null,
+//         },
+//         function (res) {
+//             $('#invitation-hs-table').html('');
+//             $.each(res.data, function (index, item) {
+//                 $('#invitation-hs-table').append(`
+//             <tr>
+//                 <td>${index + 1}</td>
+//                 <td>${item.phone}</td>
+//                 <td>${item.account.phone}</td>
+//                 <td class="${
+//                     item.result
+//                 }-text">${item.result.toUpperCase()}</td>
+//                 <td>${item.note ?? ''}</td>
+//                 <td>${formatDate(new Date(item.createdAt))}</td>
+//             </tr>
+//             `);
+//             });
+//             closeLoading();
+//         },
+//     );
+// };
+
+const loadInvitationHistory = function (search = '', status = null) {
+    showLoading();
+    $('#invitation-pagination-container').pagination({
+        ajax: function (options, refresh, $target) {
+            showLoading();
+            $.post(
+                `/history/list?page=${options.current}&size=${$(
+                    '#invitation-page-size',
+                ).val()}`,
+                {
+                    action: 'invitation',
+                    search,
+                    status,
+                    from: null,
+                    to: null,
+                    account: null,
+                },
+                function (res) {
+                    $('#invitation-hs-table').html('');
+                    if (res.statusCode == 200) {
+                        $.each(res.data, function (index, item) {
+                            $('#invitation-hs-table').append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.phone}</td>
+                                    <td>${item.account.phone}</td>
+                                    <td class="${
+                                        item.result
+                                    }-text">${item.result.toUpperCase()}</td>
+                                    <td>${item.note ?? ''}</td>
+                                    <td>${formatDate(
+                                        new Date(item.createdAt),
+                                    )}</td>
+                                </tr>
+                            `);
+                        });
+
+                        refresh({
+                            total: res.total, // optional
+                            length: $('#invitation-page-size').val(), // optional
+                        });
+                    } else {
+                        refresh({
+                            total: 0, // optional
+                            length: $('#invitation-page-size').val(), // optional
+                        });
+                    }
+                    closeLoading();
+                },
+            ).fail(function (error) {
+                closeLoading();
+            });
+        },
+    });
+};

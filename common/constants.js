@@ -13,8 +13,15 @@ const ScheduleStatus = {
     SENT: 'sent',
 };
 
+const Enviroment = {
+    DEV: 'dev',
+    TEST: 'test',
+    PROD: 'prod',
+};
+
 module.exports = {
     ActionResult,
     ActionType,
     ScheduleStatus,
+    Enviroment,
 };

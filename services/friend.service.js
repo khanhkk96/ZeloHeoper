@@ -1,10 +1,12 @@
 const AppRequestReturn = require('../common/app-request-return');
 const fs = require('fs');
-const { loginAccount } = require('../utils/helper.utils');
-const { ActionType, ActionResult } = require('../common/constants');
+const { loginAccount, getLinuxChromePath } = require('../utils/helper.utils');
+const { ActionType, ActionResult, Enviroment } = require('../common/constants');
 const History = require('../models/history.collection');
+const ZAccount = require('../models/zl_account.collection');
 const { default: puppeteer } = require('puppeteer');
 const REGEX = require('../utils/regex.utils');
+const jwt = require('jsonwebtoken');
 
 module.exports = {
     addFriend: async (file, { phone }, user, account) => {
@@ -19,6 +21,19 @@ module.exports = {
             );
         }
 
+        console.log(account._id);
+        const zaccount = await ZAccount.findById(account._id);
+        console.log(zaccount);
+        if (!zaccount || zaccount.isUsing) {
+            return new AppRequestReturn(
+                422,
+                'Tài khoản thực hiện thao tác đang được dụng.',
+            );
+        }
+        //lock zaccount
+        zaccount.isUsing = true;
+        await zaccount.save();
+
         let phoneList = [];
         if (phone) {
             phoneList.push(phone);
@@ -31,10 +46,16 @@ module.exports = {
 
         console.log('phone list: ', phoneList);
         if (!phoneList.length) {
+            //open zaccount
+            zaccount.isUsing = false;
+            await zaccount.save();
             return new AppRequestReturn(422, 'Nhập danh sách số điện thoại.');
         }
 
         if (phoneList.length > 50) {
+            //open zaccount
+            zaccount.isUsing = false;
+            await zaccount.save();
             return new AppRequestReturn(
                 422,
                 'Số lượng người muốn kết bạn vượt quá số lượng cho phép.',
@@ -44,15 +65,26 @@ module.exports = {
         let browser;
         let page;
         try {
-            browser = await puppeteer.launch({
+            const config = {
                 // headless: false,
                 // defaultViewport: false,
                 // executablePath:
                 //     'C:/Program Files/Google/Chrome/Application/chrome.exe',
-            });
+            };
+            if (process.env.NODE_ENV === Enviroment.TEST) {
+                console.log('server is launching chromium-browser');
+                config.executablePath = await getLinuxChromePath();
+                config.headless = true;
+                config.args = ['--no-sandbox'];
+            }
+            browser = await puppeteer.launch(config);
 
             page = (await browser.pages())[0];
-            await loginAccount(page, account.password, account.cookies);
+            const jwtData = jwt.verify(
+                account.password,
+                process.env.SECRET_OR_KEY,
+            );
+            await loginAccount(page, jwtData, account.cookies);
 
             await page.waitForNavigation();
 
@@ -62,6 +94,9 @@ module.exports = {
             }
         } catch (ex) {
             console.log('Error login account: ', ex);
+            //open account
+            zaccount.isUsing = false;
+            await zaccount.save();
             return new AppRequestReturn(
                 400,
                 'Không thể đăng nhập vào tài khoản đã đăng ký.',
@@ -70,7 +105,6 @@ module.exports = {
 
         const histories = [];
         for (let phoneNo of phoneList) {
-            await page.reload();
             const invitationHistory = new History({
                 user: user.userId,
                 account: account._id,
@@ -93,6 +127,7 @@ module.exports = {
             }
 
             try {
+                await page.reload({ waitUntil: 'domcontentloaded' });
                 //open search friend popup
                 const openAddFrModal = await page.waitForSelector(
                     'div[data-id="btn_Main_AddFrd"]',
@@ -112,6 +147,11 @@ module.exports = {
 
                 await page.waitForTimeout(1000);
 
+                // await page.waitForSelector(
+                //     'div[data-id="btn_UserProfile_SendMsg"]',
+                //     { visible: true, timeout: 1000 },
+                // );
+
                 const sendMsgBtn = await page.$(
                     'div[data-id="btn_UserProfile_SendMsg"]',
                 );
@@ -125,7 +165,7 @@ module.exports = {
                     'div[data-id="btn_UserProfile_CXLFrdReq"]',
                 );
                 if (cancelFrBtn) {
-                    invitationHistory.note = `Đã gửi lời kết bạn - [${phoneNo}].`;
+                    invitationHistory.note = `Đã gửi lời kết bạn - [${phoneNo}] trước đó.`;
                     histories.push(invitationHistory);
                     continue;
                 }
@@ -149,7 +189,6 @@ module.exports = {
 
                 invitationHistory.result = ActionResult.SUCCESS;
                 histories.push(invitationHistory);
-                await page.waitForTimeout(500);
             } catch (ex) {
                 console.log(
                     `Error invitation ${user.name}[${user.phone}] -> ${phoneNo}: `,
@@ -163,6 +202,9 @@ module.exports = {
         await History.bulkSave(histories);
         //close browser
         await browser.close();
+        //open zaccount
+        zaccount.isUsing = false;
+        await zaccount.save();
         console.log('***Ending invite friends');
 
         return new AppRequestReturn(

@@ -31,7 +31,7 @@ const ScheduleSchema = new Schema(
         },
         partVolume: {
             type: Number,
-            default: 100,
+            default: 500,
         },
         sentTo: {
             type: Number,
@@ -41,6 +41,10 @@ const ScheduleSchema = new Schema(
             type: String,
             enums: [ScheduleStatus.PENDING, ScheduleStatus.SENT],
             default: ScheduleStatus.PENDING,
+        },
+        isProcessing: {
+            type: Boolean,
+            default: false,
         },
     },
     { timestamps: true },
